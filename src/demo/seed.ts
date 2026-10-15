@@ -20,6 +20,7 @@
  * File này cũng là nguồn để scripts/gen-seed.ts sinh supabase/seed.sql.
  */
 import { did } from "../domain/ids.ts";
+import { initialCatalog } from "../domain/catalog.ts";
 import type {
   Account, ClassRoom, ConfigSetting, Dataset, DeAnProgress, Enrollment, GuardianLink, OrgUnit, Person,
   ProviderGrant, RoleAssignment, StaffMembership, TeachingAssignment, TodoItem,
@@ -316,6 +317,6 @@ const deAn: DeAnProgress[] = [
 export function createDemoDataset(): Dataset {
   return structuredClone({
     units, years, classes, persons, accounts, assignments, staff, teaching, enrollments, guardianLinks,
-    grants, settings, labels: [{ unitId: U.ts, key: "unit.TO", label: "Tổ bộ môn" }], audit: [], todos, deAn,
+    grants, settings, labels: [{ unitId: U.ts, key: "unit.TO", label: "Tổ bộ môn" }], audit: [], todos, deAn, catalog: initialCatalog(),
   });
 }

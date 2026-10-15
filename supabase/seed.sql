@@ -63,7 +63,8 @@ insert into iam.permission (code, description) values
   ('iam.grant.manage', 'Cấp/thu hồi quyền dữ liệu cho nhà cung cấp'),
   ('audit.log.view', 'Xem nhật ký hệ thống'),
   ('cfg.setting.view', 'Xem cấu hình, bản đồ phân hệ, từ điển dữ liệu'),
-  ('cfg.setting.manage', 'Sửa cấu hình, bật/tắt phân hệ');
+  ('cfg.setting.manage', 'Sửa cấu hình, bật/tắt phân hệ'),
+  ('cfg.catalog.manage', 'Nạp danh mục dùng chung từ CSDL ngành');
 
 insert into iam.role (code, name, portal, scope_kind, unit_types, is_system) values
   ('PLATFORM_ADMIN', 'Quản trị nền tảng', 'platform', 'PLATFORM', array['PLATFORM'], true),
@@ -88,6 +89,7 @@ insert into iam.role_permission (role_code, permission_code) values
   ('PLATFORM_ADMIN', 'iam.role.manage'),
   ('PLATFORM_ADMIN', 'cfg.setting.view'),
   ('PLATFORM_ADMIN', 'cfg.setting.manage'),
+  ('PLATFORM_ADMIN', 'cfg.catalog.manage'),
   ('PLATFORM_ADMIN', 'audit.log.view'),
   ('PLATFORM_ADMIN', 'integration.connector.view'),
   ('PLATFORM_ADMIN', 'integration.connector.manage'),
@@ -1246,6 +1248,74 @@ insert into cfg.data_term_mapping (table_name, column_name, term_code, status, n
   ('org.enrollment', 'status', 'BG_00090', 'PARTIAL', 'Nội bộ STUDYING/TRANSFERRED/GRADUATED; chuẩn là danh mục trạng thái người học của CSDL ngành'),
   ('org.staff_membership', 'position', 'BG_00326', 'PARTIAL', 'Chuẩn là danh mục chức vụ của CSDL ngành'),
   ('iam.account', 'email', 'BG_00257', 'EXACT', 'emailDn (cán bộ/nhà giáo)');
+
+
+-- Danh mục dùng chung (ADR-013) — trạng thái khởi tạo; nguồn chính thức nạp từ CSDL ngành
+insert into catalog.code_list (code, name, term_code, source, version, note) values
+  ('gioiTinh', 'Giới tính', 'BG_00010', 'ISO_5218', 'ISO/IEC 5218', 'QĐ 2768 viện dẫn chuẩn ISO/IEC 5218'),
+  ('capHoc', 'Cấp học', 'BG_00422', 'NOI_BO_TAM', null, null),
+  ('loaiHinhCsgd', 'Loại hình cơ sở giáo dục', 'BG_00429', 'NOI_BO_TAM', null, null),
+  ('khoi', 'Khối', 'BG_00506', 'NOI_BO_TAM', null, null),
+  ('trangThaiNh', 'Trạng thái người học', 'BG_00090', 'NOI_BO_TAM', null, null),
+  ('monHoc', 'Môn học', 'BG_00818', 'NOI_BO_TAM', null, 'Chưa có giá trị — nạp từ CSDL ngành'),
+  ('danToc', 'Dân tộc', 'BG_00027', 'NOI_BO_TAM', null, 'Chưa có giá trị — nạp từ CSDL ngành (CDE-CN-004)'),
+  ('chucVuTaiCoQuanCongTac', 'Chức vụ', 'BG_00326', 'NOI_BO_TAM', null, 'Chưa có giá trị — nạp từ CSDL ngành');
+
+insert into catalog.code_value (list_code, code, name, sort, deprecated) values
+  ('gioiTinh', '0', 'Không xác định', 0, false),
+  ('gioiTinh', '1', 'Nam', 1, false),
+  ('gioiTinh', '2', 'Nữ', 2, false),
+  ('gioiTinh', '9', 'Không áp dụng', 3, false),
+  ('capHoc', 'MN', 'Mầm non', 0, false),
+  ('capHoc', 'TH', 'Tiểu học', 1, false),
+  ('capHoc', 'THCS', 'Trung học cơ sở', 2, false),
+  ('capHoc', 'THPT', 'Trung học phổ thông', 3, false),
+  ('capHoc', 'LIEN_CAP', 'Liên cấp', 4, false),
+  ('loaiHinhCsgd', 'CONG_LAP', 'Công lập', 0, false),
+  ('loaiHinhCsgd', 'DAN_LAP', 'Dân lập', 1, false),
+  ('loaiHinhCsgd', 'TU_THUC', 'Tư thục', 2, false),
+  ('khoi', '1', 'Khối 1', 0, false),
+  ('khoi', '2', 'Khối 2', 1, false),
+  ('khoi', '3', 'Khối 3', 2, false),
+  ('khoi', '4', 'Khối 4', 3, false),
+  ('khoi', '5', 'Khối 5', 4, false),
+  ('khoi', '6', 'Khối 6', 5, false),
+  ('khoi', '7', 'Khối 7', 6, false),
+  ('khoi', '8', 'Khối 8', 7, false),
+  ('khoi', '9', 'Khối 9', 8, false),
+  ('khoi', '10', 'Khối 10', 9, false),
+  ('khoi', '11', 'Khối 11', 10, false),
+  ('khoi', '12', 'Khối 12', 11, false),
+  ('trangThaiNh', 'STUDYING', 'Đang học', 0, false),
+  ('trangThaiNh', 'TRANSFERRED', 'Chuyển trường', 1, false),
+  ('trangThaiNh', 'GRADUATED', 'Đã tốt nghiệp', 2, false);
+
+insert into catalog.value_map (table_name, column_name, internal_value, list_code, code) values
+  ('iam.person', 'gender', 'NAM', 'gioiTinh', '1'),
+  ('iam.person', 'gender', 'NU', 'gioiTinh', '2'),
+  ('org.unit', 'school_level', 'MN', 'capHoc', 'MN'),
+  ('org.unit', 'school_level', 'TH', 'capHoc', 'TH'),
+  ('org.unit', 'school_level', 'THCS', 'capHoc', 'THCS'),
+  ('org.unit', 'school_level', 'THPT', 'capHoc', 'THPT'),
+  ('org.unit', 'school_level', 'LIEN_CAP', 'capHoc', 'LIEN_CAP'),
+  ('org.unit', 'loai_hinh_csgd', 'Công lập', 'loaiHinhCsgd', 'CONG_LAP'),
+  ('org.unit', 'loai_hinh_csgd', 'Dân lập', 'loaiHinhCsgd', 'DAN_LAP'),
+  ('org.unit', 'loai_hinh_csgd', 'Tư thục', 'loaiHinhCsgd', 'TU_THUC'),
+  ('org.class', 'grade', '1', 'khoi', '1'),
+  ('org.class', 'grade', '2', 'khoi', '2'),
+  ('org.class', 'grade', '3', 'khoi', '3'),
+  ('org.class', 'grade', '4', 'khoi', '4'),
+  ('org.class', 'grade', '5', 'khoi', '5'),
+  ('org.class', 'grade', '6', 'khoi', '6'),
+  ('org.class', 'grade', '7', 'khoi', '7'),
+  ('org.class', 'grade', '8', 'khoi', '8'),
+  ('org.class', 'grade', '9', 'khoi', '9'),
+  ('org.class', 'grade', '10', 'khoi', '10'),
+  ('org.class', 'grade', '11', 'khoi', '11'),
+  ('org.class', 'grade', '12', 'khoi', '12'),
+  ('org.enrollment', 'status', 'STUDYING', 'trangThaiNh', 'STUDYING'),
+  ('org.enrollment', 'status', 'TRANSFERRED', 'trangThaiNh', 'TRANSFERRED'),
+  ('org.enrollment', 'status', 'GRADUATED', 'trangThaiNh', 'GRADUATED');
 
 
 -- Người & dữ liệu cá nhân (giả định)

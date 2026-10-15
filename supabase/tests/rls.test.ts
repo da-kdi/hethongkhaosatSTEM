@@ -200,6 +200,34 @@ describe.skipIf(!ADMIN_URL)("RLS · Postgres", () => {
       ).rejects.toThrow(/đã bị cấp trên khóa/);
     });
 
+    it("nạp danh mục: QTV Sở bị từ chối; QTV nền tảng nạp được, giá trị cũ ngừng dùng, có nhật ký", async () => {
+      const p = { list: "capHoc", version: "CSDL 10/2026", source: "CSDL_NGANH", fileName: "caphoc.csv",
+        values: [{ code: "THCS", name: "Trung học cơ sở" }, { code: "02", name: "Tiểu học" }] };
+      await expect(asUser(pool, { sub: A.soAdmin, active_assignment_id: R.soAdmin }, (q) =>
+        q("select catalog.import_code_list($1)", [JSON.stringify(p)]))).rejects.toThrow(/Chỉ Quản trị nền tảng/);
+      await asUser(pool, { sub: A.platformAdmin, active_assignment_id: R.platformAdmin }, async (q) => {
+        const [b] = await q<{ b: { inserted: number; updated: number; deprecated: number } }>(
+          "select to_jsonb(catalog.import_code_list($1)) as b", [JSON.stringify(p)]);
+        expect(b.b).toMatchObject({ inserted: 1, updated: 1, deprecated: 4 });
+        const vals = await q<{ code: string; deprecated: boolean }>("select code, deprecated from catalog.code_value where list_code = 'capHoc' order by code");
+        expect(vals.filter((v) => !v.deprecated).map((v) => v.code).sort()).toEqual(["02", "THCS"]);
+        expect(vals).toHaveLength(6);
+        const [l] = await q<{ source: string }>("select source from catalog.code_list where code = 'capHoc'");
+        expect(l.source).toBe("CSDL_NGANH");
+        expect(await q("select 1 from audit.log where action = 'IMPORT' and entity_id = 'capHoc'")).toHaveLength(1);
+        await expect(q("select catalog.import_code_list($1)", [JSON.stringify({ ...p, values: [{ code: "A", name: "x" }, { code: "A", name: "y" }] })]))
+          .rejects.toThrow(/trùng/);
+      });
+    });
+
+    it("danh mục chỉ đọc với người dùng thường; ghi trực tiếp bị chặn", async () => {
+      const n = await asUser(pool, { sub: A.bmHuong, active_assignment_id: R.bmHuong }, async (q) =>
+        (await q("select 1 from catalog.code_value where list_code = 'gioiTinh'")).length);
+      expect(n).toBe(4);
+      await expect(asUser(pool, { sub: A.platformAdmin, active_assignment_id: R.platformAdmin }, (q) =>
+        q("insert into catalog.code_value (list_code, code, name) values ('danToc', '01', 'Kinh')"))).rejects.toThrow(/permission denied/);
+    });
+
     it("grant NCC hết hạn: trước hạn thấy lớp, sau hạn không thấy", async () => {
       const before = await asUser(pool, { sub: A.kdiAdmin, active_assignment_id: R.kdiAdmin },
         async (q) => (await q("select id from org.class")).length, "2026-06-01");

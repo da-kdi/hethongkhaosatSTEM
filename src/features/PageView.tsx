@@ -20,6 +20,7 @@ import { GrantsPage } from "./provider/GrantsPage";
 import { DeAnProgressPage } from "./plan/DeAnProgress";
 import { ModuleMapPage } from "./cfg/ModuleMapPage";
 import { DictionaryPage } from "./cfg/DictionaryPage";
+import { CatalogPage } from "./cfg/CatalogPage";
 
 /** Trang đã triển khai (M0). Mục khác trong menu hiển thị trang "đang phát triển" kèm phạm vi & milestone. */
 const PAGES: Record<string, (p: { access: AccessContext }) => React.ReactNode> = {
@@ -37,6 +38,7 @@ const PAGES: Record<string, (p: { access: AccessContext }) => React.ReactNode> =
   "tien-trinh": DeAnProgressPage,
   "ban-do-phan-he": ModuleMapPage,
   "tu-dien": DictionaryPage,
+  "danh-muc": CatalogPage,
 };
 
 export function PageView({ portal, slug, access }: { portal: Portal; slug: string; access: AccessContext }) {

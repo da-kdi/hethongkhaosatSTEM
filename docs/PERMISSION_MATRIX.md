@@ -104,6 +104,7 @@
 | **cfg** | | | | | | | | | | | | |
 | Xem cấu hình, bản đồ phân hệ, từ điển dữ liệu <br>`cfg.setting.view` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |
 | Sửa cấu hình, bật/tắt phân hệ <br>`cfg.setting.manage` | ✓ |  |  | ✓ |  | ✓ |  |  |  |  |  |  |
+| Nạp danh mục dùng chung từ CSDL ngành <br>`cfg.catalog.manage` | ✓ |  |  |  |  |  |  |  |  |  |  |  |
 
 ## 4. Hàm phạm vi (supabase/migrations/20261015000200_iam.sql)
 

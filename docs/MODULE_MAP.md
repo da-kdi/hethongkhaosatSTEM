@@ -32,7 +32,7 @@ Nguồn chân lý: `src/domain/modules.ts`. Trang "Bản đồ phân hệ" trong
 | 0.2 | Khảo sát | `survey` | `survey` | Có | 1, 4, 5 | M4 |
 | 0.3 | Tích hợp dữ liệu & AI | `integration` | `integration` | Có | 5 | M9 |
 | 0.4 | Người dùng & phân quyền | `iam` (+ `audit`) | `iam`, `audit` | Luôn bật | 1–5 | ✅ M1 |
-| 0.5 | Quản trị nền tảng | `platform` (quyền `cfg.*`) | `cfg` | Luôn bật | 1 | ✅ M1 (cấu hình, bản đồ phân hệ, từ điển dữ liệu) |
+| 0.5 | Quản trị nền tảng | `platform` (quyền `cfg.*`) | `cfg`, `catalog` | Luôn bật | 1 | ✅ M1 (cấu hình, bản đồ phân hệ, từ điển dữ liệu) · ✅ M2a (danh mục dùng chung, nạp CSV) |
 
 Ghi chú:
 - Mã quyền `org.*`, `iam.*`, `cfg.*`, `audit.*` được dùng trong hàm RLS nên **không đổi tên**.

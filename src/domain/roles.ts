@@ -36,8 +36,8 @@ export const SYSTEM_ROLES: readonly RoleDef[] = [
     code: "PLATFORM_ADMIN", name: "Quản trị nền tảng", portal: "platform", scope: "PLATFORM",
     unitTypes: ["PLATFORM"],
     permissions: ["org.unit.view", "org.unit.manage", "iam.account.view", "iam.account.manage", "iam.role.view",
-      "iam.role.manage", "cfg.setting.view", "cfg.setting.manage", "audit.log.view", "integration.connector.view",
-      "integration.connector.manage"],
+      "iam.role.manage", "cfg.setting.view", "cfg.setting.manage", "cfg.catalog.manage", "audit.log.view",
+      "integration.connector.view", "integration.connector.manage"],
   },
   {
     code: "SO_LEADER", name: "Lãnh đạo Sở", portal: "so", scope: "UNIT_SUBTREE", unitTypes: ["SO"],

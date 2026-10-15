@@ -55,6 +55,7 @@ const ADMIN = (): NavGroup => ({
     it("cau-hinh", "Phân hệ & cấu hình", "sliders", "platform", READY, ["cfg.setting.view"]),
     it("ban-do-phan-he", "Bản đồ phân hệ", "map", "platform", READY, ["cfg.setting.view"]),
     it("tu-dien", "Từ điển dữ liệu ngành", "book-a", "platform", READY, ["cfg.setting.view"]),
+    it("danh-muc", "Danh mục dùng chung", "list", "platform", READY, ["cfg.setting.view"]),
     it("nhat-ky", "Nhật ký hệ thống", "scroll", "iam", READY, ["audit.log.view"]),
   ],
 });

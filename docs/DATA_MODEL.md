@@ -76,6 +76,16 @@ Mọi cột đã ánh xạ có `COMMENT ON COLUMN` ghi mã BG và tên kỹ thu�
 
 **Quy ước trao đổi dữ liệu:** import/export, API tích hợp và báo cáo gửi Sở/Bộ dùng **tên kỹ thuật chuẩn** làm tên cột/khóa JSON. Giá trị đã có chuẩn mã thì quy đổi khi xuất, ví dụ `gioiTinh` theo ISO/IEC 5218: NAM→`1`, NU→`2`. QĐ 2768 chưa ban hành danh sách giá trị cho các thuộc tính kiểu danh mục. Giá trị lấy từ **CSDL ngành của Bộ** (ADR-013), nạp ở M2 vào `catalog.code_list/code_value`; đến lúc đó các cột này để trạng thái PARTIAL.
 
+### catalog — Danh mục dùng chung (migration 0007, ADR-013)
+| Bảng | Nội dung |
+|---|---|
+| `catalog.code_list` | Danh mục; `code` = tên kỹ thuật thuật ngữ (vd. `capHoc`), `term_code` → `cfg.data_term`; `source` CSDL_NGANH / ISO_5218 / NOI_BO_TAM; `version`, `synced_at` |
+| `catalog.code_value` | Giá trị (mã, tên, thứ tự, hiệu lực từ/đến, `deprecated`). Giá trị không có trong bản nạp mới → `deprecated = true`, không xóa (giữ toàn vẹn dữ liệu lịch sử) |
+| `catalog.value_map` | Giá trị nội bộ của từng cột → mã chuẩn (FK tới `code_value`) |
+| `catalog.import_batch` | Lịch sử nạp: phiên bản, nguồn, tệp, số mới/cập nhật/ngừng dùng, người nạp |
+
+Ghi chỉ qua `catalog.import_code_list(jsonb)`: chỉ **Quản trị nền tảng** (`cfg.catalog.manage`); kiểm tra phiên bản, dòng rỗng, mã trùng; ghi nhật ký `IMPORT`. Khởi tạo: `gioiTinh` (ISO/IEC 5218) là chuẩn; `capHoc`, `loaiHinhCsgd`, `khoi`, `trangThaiNh` là **nội bộ tạm**; `monHoc`, `danToc`, `chucVuTaiCoQuanCongTac` để trống chờ nạp từ CSDL ngành.
+
 ## Sơ đồ quan hệ (M1)
 
 ```mermaid

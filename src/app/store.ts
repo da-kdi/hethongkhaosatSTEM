@@ -10,6 +10,7 @@
 import { useSyncExternalStore } from "react";
 import { assignmentsOf, buildAccess, ancestorsOf, subtreeIds, type AccessContext } from "@/domain/access";
 import { canWriteSetting } from "@/domain/config";
+import { applyImport, type ImportInput } from "@/domain/catalog";
 import type { AuditEntry, ConfigMode, Dataset } from "@/domain/model";
 import { createDemoDataset, DEMO_TODAY } from "@/demo/seed";
 
@@ -30,9 +31,9 @@ function load(): State {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return fresh;
-    const saved = JSON.parse(raw) as Partial<Pick<Dataset, "settings" | "audit">> & { session?: Session };
+    const saved = JSON.parse(raw) as Partial<Pick<Dataset, "settings" | "audit" | "catalog">> & { session?: Session };
     return {
-      ds: { ...fresh.ds, settings: saved.settings ?? fresh.ds.settings, audit: saved.audit ?? [] },
+      ds: { ...fresh.ds, settings: saved.settings ?? fresh.ds.settings, audit: saved.audit ?? [], catalog: saved.catalog ?? fresh.ds.catalog },
       session: saved.session ?? fresh.session,
     };
   } catch {
@@ -45,7 +46,7 @@ const listeners = new Set<() => void>();
 
 function persist() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ settings: state.ds.settings, audit: state.ds.audit, session: state.session }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ settings: state.ds.settings, audit: state.ds.audit, catalog: state.ds.catalog, session: state.session }));
   } catch {
     /* trình duyệt chặn lưu trữ — vẫn chạy được trong bộ nhớ */
   }
@@ -113,6 +114,21 @@ export const actions = {
       /* bỏ qua */
     }
     set({ ds: createDemoDataset(), session: { accountId: null, assignmentId: null } });
+  },
+  /** Nạp danh mục — kiểm quyền giống catalog.import_code_list(): chỉ Quản trị nền tảng */
+  importCodeList(input: ImportInput) {
+    const access = getAccess();
+    if (!access || access.role.scope !== "PLATFORM" || !access.has("cfg.catalog.manage")) {
+      throw new Error("Chỉ Quản trị nền tảng được nạp danh mục");
+    }
+    const now = new Date().toISOString();
+    const catalog = applyImport(state.ds.catalog, input, state.session.accountId ?? undefined, now);
+    const b = catalog.batches[0];
+    set({
+      ...state,
+      ds: { ...state.ds, catalog, audit: audit(state.ds, state.session, { action: "IMPORT", entity: "catalog.code_list", entityId: input.list, summary: `Phiên bản ${b.version} (${b.source}): +${b.inserted} mới, ${b.updated} cập nhật, ${b.deprecated} ngừng dùng` }) },
+    });
+    return b;
   },
   /** Ghi cấu hình — kiểm quyền giống cfg.set_setting() + trigger khóa MANDATORY */
   setSetting(unitId: string, key: string, value: unknown, mode: ConfigMode) {

@@ -83,6 +83,7 @@ export const PERMISSIONS = {
   // 0.5 · Quản trị nền tảng
   "cfg.setting.view": "Xem cấu hình, bản đồ phân hệ, từ điển dữ liệu",
   "cfg.setting.manage": "Sửa cấu hình, bật/tắt phân hệ",
+  "cfg.catalog.manage": "Nạp danh mục dùng chung từ CSDL ngành",
 } as const;
 
 export type Permission = keyof typeof PERMISSIONS;

@@ -12,6 +12,7 @@ const ACTION_LABEL: Record<string, { label: string; variant: "default" | "succes
   INSERT: { label: "Tạo", variant: "success" },
   UPDATE: { label: "Sửa", variant: "warning" },
   DELETE: { label: "Xóa", variant: "danger" },
+  IMPORT: { label: "Nạp danh mục", variant: "default" },
 };
 
 const ENTITY_LABEL: Record<string, string> = {
@@ -22,6 +23,7 @@ const ENTITY_LABEL: Record<string, string> = {
   "iam.provider_grant": "Quyền dữ liệu NCC",
   "iam.person_private": "Dữ liệu cá nhân",
   "cfg.setting": "Cấu hình",
+  "catalog.code_list": "Danh mục dùng chung",
 };
 
 /** Mirror policy audit_read (0005_rls_grants.sql). */

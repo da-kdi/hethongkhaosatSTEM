@@ -166,6 +166,8 @@ export interface DeAnProgress {
   steps: { no: 1 | 2 | 3 | 4 | 5; status: StepStatus; items: { label: string; module: string; done: boolean }[] }[];
 }
 
+import type { CatalogState } from "./catalog.ts";
+
 export interface Dataset {
   units: OrgUnit[];
   years: AcademicYear[];
@@ -183,4 +185,5 @@ export interface Dataset {
   audit: AuditEntry[];
   todos: TodoItem[];
   deAn: DeAnProgress[];
+  catalog: CatalogState;
 }

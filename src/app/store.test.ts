@@ -59,4 +59,14 @@ describe("Kho demo · ghi cấu hình (mirror cfg.set_setting)", () => {
     expect(visibleAudit(ds(), loginAs(A.bmAnh, R.bmAnh))).toEqual([]);
     expect(visibleAudit(ds(), loginAs(A.bmAdmin, R.bmAdmin)).some((e) => e.unitId === U.ts)).toBe(false);
   });
+
+  it("nạp danh mục: chỉ Quản trị nền tảng; QTV Sở bị từ chối; có nhật ký", () => {
+    const input = { list: "danToc", version: "CSDL 10/2026", source: "CSDL_NGANH" as const, values: [{ code: "01", name: "Kinh" }] };
+    loginAs(A.soAdmin, R.soAdmin);
+    expect(() => actions.importCodeList(input)).toThrow(/Chỉ Quản trị nền tảng/);
+    loginAs(A.platformAdmin, R.platformAdmin);
+    expect(actions.importCodeList(input)).toMatchObject({ inserted: 1 });
+    expect(ds().catalog.values.filter((x) => x.listCode === "danToc")).toHaveLength(1);
+    expect(ds().audit[0]).toMatchObject({ action: "IMPORT", entity: "catalog.code_list", entityId: "danToc" });
+  });
 });

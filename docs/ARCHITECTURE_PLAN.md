@@ -99,7 +99,7 @@ Mỗi đơn vị có **tiến trình đề án** theo năm học (bước đang 
 |---|---|---|---|
 | M0–M1 ✅ | 0.4, 0.5, 4 (đọc) + tái cấu trúc v0.2 | – | RLS 7 vai trò; 14 phân hệ trong registry/menu; từ điển 892 thuật ngữ; test đồng bộ |
 | M1b | Adapter Supabase | – | Đăng nhập thật, đổi ngữ cảnh qua JWT, đọc qua RLS trên Supabase project mới |
-| M2 | **4** Tổ chức dạy học đầy đủ + **danh mục CSDL ngành** | 2 | Nạp danh mục chuẩn từ CSDL ngành (cấp học, loại hình, khối, môn, trạng thái, chức vụ, dân tộc, đơn vị hành chính); quy đổi nội bộ → chuẩn; import/export Excel **theo tên kỹ thuật QĐ 2768**; báo lỗi theo dòng; liên kết PH (W8); hồ sơ NCC |
+| M2 | **4** Tổ chức dạy học đầy đủ + **danh mục CSDL ngành** (M2a ✅ khung danh mục & nạp CSV · M2b hồ sơ GV/lớp/HS · M2c import/export Excel, liên kết PH, hồ sơ NCC) | 2 | Nạp danh mục chuẩn từ CSDL ngành (cấp học, loại hình, khối, môn, trạng thái, chức vụ, dân tộc, đơn vị hành chính); quy đổi nội bộ → chuẩn; import/export Excel **theo tên kỹ thuật QĐ 2768**; báo lỗi theo dòng; liên kết PH (W8); hồ sơ NCC |
 | M3 | **0** Định hướng & kế hoạch + **8** Quy trình & thông báo | 1, 2 | Sở ban hành → giao chỉ tiêu → trường lập kế hoạch → Sở duyệt/trả lại; tiến trình 5 bước tính tự động; minh chứng lưu object storage |
 | M4 | **0.2** Khảo sát | 1, 4 | Sở phát hành phiếu hiện trạng (bắt buộc), trường thêm câu; tỷ lệ phản hồi; tổng hợp theo trường; ẩn danh đúng cấu hình |
 | M5 | **2** Chương trình & học liệu + **1** Đào tạo GV | 2, 3 | Thẩm định → công bố học liệu NCC; khóa bồi dưỡng, chứng chỉ, xếp loại năng lực GV |
