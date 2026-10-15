@@ -228,6 +228,39 @@ describe.skipIf(!ADMIN_URL)("RLS · Postgres", () => {
         q("insert into catalog.code_value (list_code, code, name) values ('danToc', '01', 'Kinh')"))).rejects.toThrow(/permission denied/);
     });
 
+    it("M2b · QTV trường ghi hồ sơ qua RPC; kết quả hiện qua RLS; có nhật ký; trường khác bị chặn", async () => {
+      await asUser(pool, { sub: A.bmAdmin, active_assignment_id: R.bmAdmin }, async (q) => {
+        const [{ id: dept }] = await q<{ id: string }>("select org.upsert_department($1) as id", [JSON.stringify({ schoolId: U.bm, name: "Tổ Ngữ văn" })]);
+        const [{ id: gv }] = await q<{ id: string }>("select org.upsert_teacher($1) as id",
+          [JSON.stringify({ unitId: dept, fullName: "Trịnh  Văn Bảo", gender: "NAM", position: "Giáo viên", phone: "0900099999" })]);
+        const [{ id: cls }] = await q<{ id: string }>("select org.upsert_class($1) as id",
+          [JSON.stringify({ schoolId: U.bm, name: "6A2", grade: 6, departmentId: dept, homeroomPersonId: gv })]);
+        await q("select org.set_teaching($1)", [JSON.stringify({ personId: gv, classId: cls, subject: "Ngữ văn" })]);
+        const [{ id: hs }] = await q<{ id: string }>("select org.upsert_student($1) as id",
+          [JSON.stringify({ classId: cls, fullName: "Lê Minh Khang", gender: "NAM", studentCode: "hs9001" })]);
+        expect((await q<{ full_name: string }>("select full_name from iam.person where id = $1", [gv]))[0].full_name).toBe("Trịnh Văn Bảo");
+        expect((await q<{ student_code: string }>("select student_code from org.enrollment where student_person_id = $1", [hs]))[0].student_code).toBe("HS9001");
+        expect(await q("select 1 from org.class where id = $1", [cls])).toHaveLength(1);
+        await q("savepoint dup");
+        await expect(q("select org.upsert_student($1)", [JSON.stringify({ classId: cls, fullName: "Ai Đó", studentCode: "HS9001" })])).rejects.toThrow(/đã tồn tại/);
+        await q("rollback to savepoint dup");
+        await q("select org.set_student_status($1, 'TRANSFERRED')", [hs]);
+        // Sau khi chuyển trường, RLS (chỉ xét học sinh đang học) ẩn hồ sơ với trường cũ — tối thiểu dữ liệu (DECISIONS: câu hỏi mở)
+        expect(await q("select 1 from org.enrollment where student_person_id = $1", [hs])).toHaveLength(0);
+        expect((await q("select 1 from audit.log where entity = 'org.class' and unit_id = $1", [U.bm])).length).toBeGreaterThan(0);
+        const pii = await q<{ summary: Record<string, unknown> }>("select summary from audit.log where entity = 'iam.person' and entity_id = $1", [gv]);
+        expect(pii[0].summary).not.toHaveProperty("new");
+      });
+      await expect(asUser(pool, { sub: A.bmAdmin, active_assignment_id: R.bmAdmin }, (q) =>
+        q("select org.upsert_class($1)", [JSON.stringify({ schoolId: U.ts, name: "10A9", grade: 10 })]))).rejects.toThrow(/Không có quyền/);
+      await expect(asUser(pool, { sub: A.bmPrincipal, active_assignment_id: R.bmPrincipal }, (q) =>
+        q("select org.upsert_department($1)", [JSON.stringify({ schoolId: U.bm, name: "Tổ X" })]))).rejects.toThrow(/Không có quyền/);
+      await expect(asUser(pool, { sub: A.bmAdmin, active_assignment_id: R.bmAdmin }, (q) =>
+        q("select org.upsert_teacher($1)", [JSON.stringify({ personId: P.tsNgoc, unitId: U.bm, fullName: "Đinh Thị Ngọc" })]))).rejects.toThrow(/trường của bạn/);
+      await expect(asUser(pool, { sub: A.bmAdmin, active_assignment_id: R.bmAdmin }, (q) =>
+        q("select org.upsert_department($1)", [JSON.stringify({ id: U.bmKhtn, name: "Tổ KHTN", status: "INACTIVE" })]))).rejects.toThrow(/còn quản lý lớp/);
+    });
+
     it("grant NCC hết hạn: trước hạn thấy lớp, sau hạn không thấy", async () => {
       const before = await asUser(pool, { sub: A.kdiAdmin, active_assignment_id: R.kdiAdmin },
         async (q) => (await q("select id from org.class")).length, "2026-06-01");

@@ -72,6 +72,7 @@
 | — | Dữ liệu demo | Hư cấu: tỉnh "An Hòa", 3 trường, 2 NCC |
 
 ## Câu hỏi mở
+- **(M2b)** Học sinh đã chuyển trường/tốt nghiệp: hiện trường cũ **mất quyền xem** hồ sơ ngay khi đổi trạng thái (theo nguyên tắc tối thiểu dữ liệu). Có cần cho BGH/QTV trường cũ xem lại hồ sơ đã rời trường trong một thời hạn (ví dụ để báo cáo cuối năm) không?
 - ✅ **(v0.2, đã trả lời 16/10)** Thêm "Phân hệ 0 · Định hướng & kế hoạch đề án" làm phân hệ thứ 14: **đồng ý**.
 - ✅ **(v0.2, đã trả lời 16/10)** Đưa Khảo sát lên ngay sau M2: **không**, giữ lộ trình theo 5 bước (M4).
 - ✅ **(v0.2, đã trả lời 16/10)** Danh mục giá trị chuẩn: **CSDL ngành của Bộ** (ADR-013). Còn cần: file danh mục hoặc quyền kết nối.

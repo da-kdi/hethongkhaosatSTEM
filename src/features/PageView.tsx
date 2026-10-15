@@ -21,6 +21,7 @@ import { DeAnProgressPage } from "./plan/DeAnProgress";
 import { ModuleMapPage } from "./cfg/ModuleMapPage";
 import { DictionaryPage } from "./cfg/DictionaryPage";
 import { CatalogPage } from "./cfg/CatalogPage";
+import { StaffPage } from "./org/StaffPage";
 
 /** Trang đã triển khai (M0). Mục khác trong menu hiển thị trang "đang phát triển" kèm phạm vi & milestone. */
 const PAGES: Record<string, (p: { access: AccessContext }) => React.ReactNode> = {
@@ -39,6 +40,7 @@ const PAGES: Record<string, (p: { access: AccessContext }) => React.ReactNode> =
   "ban-do-phan-he": ModuleMapPage,
   "tu-dien": DictionaryPage,
   "danh-muc": CatalogPage,
+  "nhan-su": StaffPage,
 };
 
 export function PageView({ portal, slug, access }: { portal: Portal; slug: string; access: AccessContext }) {

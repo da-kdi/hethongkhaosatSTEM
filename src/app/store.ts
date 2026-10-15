@@ -11,6 +11,7 @@ import { useSyncExternalStore } from "react";
 import { assignmentsOf, buildAccess, ancestorsOf, subtreeIds, type AccessContext } from "@/domain/access";
 import { canWriteSetting } from "@/domain/config";
 import { applyImport, type ImportInput } from "@/domain/catalog";
+import * as org from "@/domain/orgOps";
 import type { AuditEntry, ConfigMode, Dataset } from "@/domain/model";
 import { createDemoDataset, DEMO_TODAY } from "@/demo/seed";
 
@@ -24,16 +25,20 @@ interface State {
   session: Session;
 }
 
-const STORAGE_KEY = "stem-demo-v1";
+const STORAGE_KEY = "stem-demo-v2";
+
+/** Phần dữ liệu demo lưu lại giữa các lần tải trang (dữ liệu hư cấu). */
+const PERSISTED = ["settings", "audit", "catalog", "units", "classes", "persons", "staff", "teaching", "enrollments"] as const;
+type PersistedKey = (typeof PERSISTED)[number];
 
 function load(): State {
   const fresh: State = { ds: createDemoDataset(), session: { accountId: null, assignmentId: null } };
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return fresh;
-    const saved = JSON.parse(raw) as Partial<Pick<Dataset, "settings" | "audit" | "catalog">> & { session?: Session };
+    const saved = JSON.parse(raw) as Partial<Pick<Dataset, PersistedKey>> & { session?: Session };
     return {
-      ds: { ...fresh.ds, settings: saved.settings ?? fresh.ds.settings, audit: saved.audit ?? [], catalog: saved.catalog ?? fresh.ds.catalog },
+      ds: { ...fresh.ds, ...Object.fromEntries(PERSISTED.filter((k) => saved[k] !== undefined).map((k) => [k, saved[k]])) },
       session: saved.session ?? fresh.session,
     };
   } catch {
@@ -46,7 +51,7 @@ const listeners = new Set<() => void>();
 
 function persist() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ settings: state.ds.settings, audit: state.ds.audit, catalog: state.ds.catalog, session: state.session }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...Object.fromEntries(PERSISTED.map((k) => [k, state.ds[k]])), session: state.session }));
   } catch {
     /* trình duyệt chặn lưu trữ — vẫn chạy được trong bộ nhớ */
   }
@@ -92,6 +97,16 @@ export function getAccess(s: State = state): AccessContext | null {
   return buildAccess(s.ds, s.session.accountId, s.session.assignmentId, TODAY);
 }
 
+/** Ghi hồ sơ: chạy quy tắc (mirror RPC), ghi nhật ký (không lưu giá trị cá nhân). */
+function mutateOrg(entity: string, action: string, fn: (ds: Dataset, a: AccessContext) => [Dataset, string], summary: string): string {
+  const access = getAccess();
+  if (!access) throw new Error("Chưa chọn ngữ cảnh");
+  const [ds, id] = fn(state.ds, access);
+  const unitId = access.configUnitId;
+  set({ ...state, ds: { ...ds, audit: audit(ds, state.session, { action, entity, entityId: id, unitId, summary }) } });
+  return id;
+}
+
 export const actions = {
   login(accountId: string) {
     const ctxs = assignmentsOf(state.ds, accountId, TODAY);
@@ -115,6 +130,15 @@ export const actions = {
     }
     set({ ds: createDemoDataset(), session: { accountId: null, assignmentId: null } });
   },
+  // ---------- Phân hệ 4 · hồ sơ tổ chức dạy học (mirror RPC org.*) ----------
+  upsertDepartment: (p: org.DepartmentInput) => mutateOrg("org.unit", p.id ? "UPDATE" : "INSERT", (ds, a) => org.upsertDepartment(ds, a, p), `Tổ: ${p.name}`),
+  upsertTeacher: (p: org.TeacherInput) => mutateOrg("org.staff_membership", p.personId ? "UPDATE" : "INSERT", (ds, a) => org.upsertTeacher(ds, a, p), "Hồ sơ giáo viên"),
+  upsertClass: (p: org.ClassInput) => mutateOrg("org.class", p.id ? "UPDATE" : "INSERT", (ds, a) => org.upsertClass(ds, a, p), `Lớp ${p.name}`),
+  upsertStudent: (p: org.StudentInput) => mutateOrg("org.enrollment", p.personId ? "UPDATE" : "INSERT", (ds, a) => org.upsertStudent(ds, a, p), "Hồ sơ học sinh"),
+  setTeaching: (p: org.TeachingInput) =>
+    mutateOrg("org.teaching_assignment", p.remove ? "DELETE" : "INSERT", (ds, a) => [org.setTeaching(ds, a, p), p.classId], `Phân công ${p.subject}`),
+  setStudentStatus: (personId: string, status: "STUDYING" | "TRANSFERRED" | "GRADUATED") =>
+    mutateOrg("org.enrollment", "UPDATE", (ds, a) => [org.setStudentStatus(ds, a, personId, status), personId], `Trạng thái: ${status}`),
   /** Nạp danh mục — kiểm quyền giống catalog.import_code_list(): chỉ Quản trị nền tảng */
   importCodeList(input: ImportInput) {
     const access = getAccess();

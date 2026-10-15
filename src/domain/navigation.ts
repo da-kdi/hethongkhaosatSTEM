@@ -120,7 +120,7 @@ export const NAVIGATION: Record<Portal, NavGroup[]> = {
     ]),
     ph("org", [
       it("hoc-sinh", "Lớp & học sinh", "users", "org", READY, ["org.class.view"]),
-      it("nhan-su", "Giáo viên & tổ chuyên môn", "id", "org", "M2", ["org.person.view"], "Hồ sơ cán bộ/nhà giáo, tổ, phân công; import theo từ điển dữ liệu."),
+      it("nhan-su", "Giáo viên & tổ chuyên môn", "id", "org", READY, ["org.person.view"]),
       it("lien-ket-phu-huynh", "Liên kết phụ huynh", "link", "org", "M2", ["iam.guardian.approve"], "Phát mã mời, xác minh, thu hồi liên kết (W8)."),
       it("doi-tac", "Nhà cung cấp & cấp quyền", "handshake", "org", "M2", ["iam.grant.manage"]),
     ]),

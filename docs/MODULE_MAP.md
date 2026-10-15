@@ -23,7 +23,7 @@ Nguồn chân lý: `src/domain/modules.ts`. Trang "Bản đồ phân hệ" trong
 | 1 | Đào tạo & đánh giá năng lực GV | `training` | `training` | Có | 2, 3, 4 | M5 |
 | 2 | Chương trình & học liệu STEM | `program` | `program` | Có | 1, 2, 3 | M5 |
 | 3 | Thiết bị, vật tư & phòng STEM | `resource` | `resource` | Có | 2, 3, 4 | M6 |
-| 4 | Tổ chức dạy học | `org` | `org` | Luôn bật | 2 | Đọc ✅ (M1); tạo/sửa + import M2 |
+| 4 | Tổ chức dạy học | `org` | `org` | Luôn bật | 2 | Đọc ✅ (M1) · ✅ M2b ghi hồ sơ tổ, GV, phân công, lớp, HS (RPC `org.upsert_*`, `org.set_*`) · M2c import/export, liên kết PH, hồ sơ NCC |
 | 5 | Kế hoạch & lịch dạy | `schedule` | `schedule` | Có | 2, 3 | M6 |
 | 6 | Buổi dạy & điểm danh | `session` | `session` | Có | 3 | M7 (PWA offline) |
 | 7 | Đánh giá năng lực & sản phẩm | `assess` | `assess` | Có | 4 | M7 |

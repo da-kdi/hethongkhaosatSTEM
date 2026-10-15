@@ -76,6 +76,20 @@ Mọi cột đã ánh xạ có `COMMENT ON COLUMN` ghi mã BG và tên kỹ thu�
 
 **Quy ước trao đổi dữ liệu:** import/export, API tích hợp và báo cáo gửi Sở/Bộ dùng **tên kỹ thuật chuẩn** làm tên cột/khóa JSON. Giá trị đã có chuẩn mã thì quy đổi khi xuất, ví dụ `gioiTinh` theo ISO/IEC 5218: NAM→`1`, NU→`2`. QĐ 2768 chưa ban hành danh sách giá trị cho các thuộc tính kiểu danh mục. Giá trị lấy từ **CSDL ngành của Bộ** (ADR-013), nạp ở M2 vào `catalog.code_list/code_value`; đến lúc đó các cột này để trạng thái PARTIAL.
 
+### Ghi hồ sơ phân hệ 4 (migration 0008, M2b)
+RPC `security definer` (mirror TS: `src/domain/orgOps.ts`), mỗi hàm kiểm quyền + đơn vị đích trong phạm vi + cùng trường:
+
+| RPC | Quyền | Quy tắc chính |
+|---|---|---|
+| `org.upsert_department(p)` | `org.unit.manage` | Tổ thuộc trường; tên không trùng trong trường; ngừng (INACTIVE) khi không còn lớp |
+| `org.upsert_teacher(p)` | `org.person.manage` | Tạo `iam.person` + `person_private` + `staff_membership`; chỉ sửa GV thuộc trường mình; kiểm tra SĐT |
+| `org.set_teaching(p)` | `org.class.manage` | GV và lớp cùng trường; thêm/bỏ phân công |
+| `org.upsert_class(p)` | `org.class.manage` | Năm học hiện hành; tên không trùng; khối 0–12; tổ & GVCN thuộc trường |
+| `org.upsert_student(p)` | `org.person.manage` | Mã HS 3–30 ký tự, chuẩn hóa chữ hoa, duy nhất; đổi lớp trong trường |
+| `org.set_student_status(id, st)` | `org.person.manage` | Đang học / Chuyển trường / Tốt nghiệp — không xóa hồ sơ |
+
+Nhật ký: trigger trên `org.unit`, `org.class`, `org.staff_membership`, `org.teaching_assignment`; `org.enrollment` và `iam.person` ở chế độ PII (chỉ ghi tên cột thay đổi).
+
 ### catalog — Danh mục dùng chung (migration 0007, ADR-013)
 | Bảng | Nội dung |
 |---|---|
