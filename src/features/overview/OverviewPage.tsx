@@ -8,6 +8,7 @@ import type { Dataset, TodoItem } from "@/domain/model";
 import { Badge } from "@/components/ui/badge";
 import { Empty, PageHeader, Section, Stat } from "@/components/layout/page";
 import { cn } from "@/lib/utils";
+import { DeAnStepper } from "@/features/plan/DeAnProgress";
 
 const GREETING: Record<string, string> = {
   platform: "Quản trị cấu hình nền tảng — không mặc định xem dữ liệu cá nhân.",
@@ -30,6 +31,7 @@ export function OverviewPage({ access }: { access: AccessContext }) {
     <div>
       <PageHeader title={`Xin chào, ${person?.fullName.split(" ").at(-1)}`} description={GREETING[portal]} />
       <Kpis ds={ds} access={access} />
+      <ProgressStrip ds={ds} access={access} />
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <div className="grid content-start gap-6">
           <PortalBody ds={ds} access={access} />
@@ -216,6 +218,23 @@ function GrantsSummary({ ds, access }: { ds: Dataset; access: AccessContext }) {
           </li>
         ))}
       </ul>
+    </Section>
+  );
+}
+
+function ProgressStrip({ ds, access }: { ds: Dataset; access: AccessContext }) {
+  const p = access.role.portal;
+  if ((p !== "so" && p !== "truong") || !access.has("plan.plan.view")) return null;
+  const progress = ds.deAn.find((d) => d.unitId === access.scopeUnit.id);
+  if (!progress) return null;
+  return (
+    <Section
+      className="mt-6"
+      title="Tiến trình đề án năm học"
+      description="Dữ liệu minh họa · 5 bước triển khai"
+      actions={<Link to="/$portal/$page" params={{ portal: p, page: "tien-trinh" }} className="text-xs font-medium text-primary">Xem chi tiết</Link>}
+    >
+      <DeAnStepper progress={progress} compact />
     </Section>
   );
 }

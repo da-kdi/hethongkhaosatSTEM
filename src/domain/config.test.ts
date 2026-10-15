@@ -22,8 +22,8 @@ describe("Cấu hình kế thừa", () => {
     expect(other.value).not.toContain("CLB Robotics");
   });
   it("AUTONOMOUS: trường tự tắt bước tổ duyệt", () => {
-    expect(resolveSetting<{ enabled: boolean }>(ds.settings, chain(U.ts), "wf.activity.dept_review").value?.enabled).toBe(false);
-    expect(resolveSetting<{ enabled: boolean }>(ds.settings, chain(U.bm), "wf.activity.dept_review").value?.enabled).toBe(true);
+    expect(resolveSetting<{ enabled: boolean }>(ds.settings, chain(U.ts), "wf.session.dept_review").value?.enabled).toBe(false);
+    expect(resolveSetting<{ enabled: boolean }>(ds.settings, chain(U.bm), "wf.session.dept_review").value?.enabled).toBe(true);
   });
   it("Tổ thừa hưởng trạng thái module của trường", () => {
     expect(isModuleEnabled(ds.settings, chain(U.smK45), "resource")).toBe(false);

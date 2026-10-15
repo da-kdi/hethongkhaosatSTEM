@@ -72,7 +72,7 @@ export function AuditPage({ access }: { access: AccessContext }) {
       />
       <Section title={`${rows.length} bản ghi`} description="Trong phạm vi đơn vị của bạn, cùng các thao tác do chính bạn thực hiện.">
         {rows.length === 0 ? (
-          <Empty title="Chưa có bản ghi">Thử bật/tắt một module ở trang “Module & cấu hình”, thao tác đó sẽ xuất hiện ở đây.</Empty>
+          <Empty title="Chưa có bản ghi">Thử bật/tắt một phân hệ ở trang “Phân hệ & cấu hình”, thao tác đó sẽ xuất hiện ở đây.</Empty>
         ) : (
           <TableWrap>
             <thead>

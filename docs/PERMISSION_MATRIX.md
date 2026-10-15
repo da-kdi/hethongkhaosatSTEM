@@ -31,14 +31,66 @@
 
 | Quyền | PLATFORM_ADMIN | SO_LEADER | SO_SPECIALIST | SO_ADMIN | SCHOOL_LEADER | SCHOOL_ADMIN | DEPT_HEAD | TEACHER | STUDENT | GUARDIAN | PROVIDER_ADMIN | PROVIDER_EXPERT |
 |---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| **plan** | | | | | | | | | | | | |
+| Xem bộ chỉ số & chỉ tiêu <br>`plan.target.view` |  | ✓ | ✓ |  | ✓ |  |  |  |  |  |  |  |
+| Ban hành đề án, bộ chỉ số, giao chỉ tiêu <br>`plan.target.manage` |  | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| Xem kế hoạch STEM & tiến trình đề án <br>`plan.plan.view` |  | ✓ | ✓ |  | ✓ |  | ✓ | ✓ |  |  |  |  |
+| Lập/sửa kế hoạch STEM <br>`plan.plan.create` |  |  |  |  | ✓ |  | ✓ |  |  |  |  |  |
+| Duyệt kế hoạch STEM <br>`plan.plan.approve` |  | ✓ | ✓ |  | ✓ |  | ✓ |  |  |  |  |  |
+| **training** | | | | | | | | | | | | |
+| Xem khóa bồi dưỡng, tập huấn <br>`training.course.view` |  | ✓ | ✓ |  | ✓ |  | ✓ | ✓ |  |  | ✓ | ✓ |
+| Tổ chức khóa bồi dưỡng, cấp chứng chỉ <br>`training.course.manage` |  |  | ✓ |  | ✓ |  |  |  |  |  | ✓ | ✓ |
+| Đánh giá, xếp loại năng lực giáo viên <br>`training.competency.evaluate` |  |  |  |  | ✓ |  | ✓ |  |  |  |  |  |
+| **program** | | | | | | | | | | | | |
+| Xem chương trình & học liệu đã công bố <br>`program.content.view` |  | ✓ | ✓ |  | ✓ |  | ✓ | ✓ | ✓ |  | ✓ | ✓ |
+| Soạn chương trình, bài học, học liệu <br>`program.content.create` |  |  |  |  |  |  | ✓ | ✓ |  |  | ✓ | ✓ |
+| Thẩm định & công bố học liệu <br>`program.content.approve` |  | ✓ | ✓ |  | ✓ |  |  |  |  |  |  |  |
+| **resource** | | | | | | | | | | | | |
+| Xem phòng, thiết bị, vật tư <br>`resource.room.view` |  | ✓ | ✓ |  | ✓ | ✓ | ✓ | ✓ |  |  |  |  |
+| Quản lý phòng, thiết bị, kiểm kê <br>`resource.room.manage` |  |  |  |  |  | ✓ |  |  |  |  |  |  |
+| Nhập – xuất – tồn vật tư <br>`resource.stock.manage` |  |  |  |  |  | ✓ |  |  |  |  |  |  |
+| Xử lý bảo trì, bảo hành <br>`resource.ticket.handle` |  |  |  |  |  |  |  |  |  |  | ✓ | ✓ |
 | **org** | | | | | | | | | | | | |
-| Xem đơn vị <br>`org.unit.view` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |
+| Xem đơn vị, cơ sở giáo dục <br>`org.unit.view` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |
 | Quản trị đơn vị (tạo/sửa/ngừng) <br>`org.unit.manage` | ✓ |  |  | ✓ |  | ✓ |  |  |  |  |  |  |
 | Xem lớp học <br>`org.class.view` |  | ✓ | ✓ |  | ✓ | ✓ | ✓ | ✓ |  |  |  |  |
-| Quản trị lớp học <br>`org.class.manage` |  |  |  |  |  | ✓ |  |  |  |  |  |  |
+| Quản trị lớp học, phân công <br>`org.class.manage` |  |  |  |  |  | ✓ |  |  |  |  |  |  |
 | Xem danh sách người (tên, vai trò) <br>`org.person.view` |  | ✓ | ✓ |  | ✓ | ✓ | ✓ | ✓ |  |  |  |  |
-| Xem dữ liệu cá nhân chi tiết (ngày sinh, liên hệ) <br>`org.person.personal` |  |  |  |  | ✓ | ✓ |  |  |  |  |  |  |
-| Quản trị hồ sơ người <br>`org.person.manage` |  |  |  |  |  | ✓ |  |  |  |  |  |  |
+| Xem dữ liệu cá nhân chi tiết (ngày sinh, liên hệ, định danh) <br>`org.person.personal` |  |  |  |  | ✓ | ✓ |  |  |  |  |  |  |
+| Quản trị hồ sơ người học, cán bộ/nhà giáo <br>`org.person.manage` |  |  |  |  |  | ✓ |  |  |  |  |  |  |
+| Quản lý hồ sơ nhà cung cấp <br>`org.provider.manage` |  |  |  |  |  |  |  |  |  |  | ✓ |  |
+| Xem tình hình học tập của con <br>`org.child.view` |  |  |  |  |  |  |  |  |  | ✓ |  |  |
+| **schedule** | | | | | | | | | | | | |
+| Xem kế hoạch & lịch dạy STEM <br>`schedule.lesson.view` |  | ✓ | ✓ |  | ✓ | ✓ | ✓ | ✓ |  |  |  |  |
+| Lập kế hoạch & lịch dạy, phân công <br>`schedule.lesson.create` |  |  |  |  |  |  | ✓ | ✓ |  |  |  |  |
+| Đặt phòng/mượn thiết bị <br>`schedule.booking.create` |  |  |  |  |  |  |  | ✓ |  |  |  |  |
+| Duyệt đặt phòng, xử lý xung đột <br>`schedule.booking.approve` |  |  |  |  | ✓ | ✓ |  |  |  |  |  |  |
+| Đăng ký hoạt động, sự kiện <br>`schedule.event.register` |  |  |  |  |  |  |  |  | ✓ | ✓ |  |  |
+| **session** | | | | | | | | | | | | |
+| Xem buổi dạy & điểm danh <br>`session.attendance.view` |  | ✓ | ✓ |  | ✓ |  | ✓ | ✓ | ✓ |  |  |  |
+| Check-in, điểm danh, nhật ký buổi dạy <br>`session.attendance.record` |  |  |  |  |  |  |  | ✓ |  |  |  |  |
+| Rà soát, duyệt minh chứng buổi dạy <br>`session.evidence.approve` |  |  |  |  | ✓ |  | ✓ |  |  |  |  |  |
+| **assess** | | | | | | | | | | | | |
+| Xem nhiệm vụ, dự án, kết quả <br>`assess.task.view` |  | ✓ | ✓ |  | ✓ |  | ✓ | ✓ | ✓ |  |  |  |
+| Giao nhiệm vụ/dự án <br>`assess.task.create` |  |  |  |  |  |  |  | ✓ |  |  |  |  |
+| Nộp bài, sản phẩm <br>`assess.task.submit` |  |  |  |  |  |  |  |  | ✓ |  |  |  |
+| Đánh giá theo rubric, nhận xét <br>`assess.evaluation.create` |  |  |  |  |  |  |  | ✓ |  |  |  |  |
+| **workflow** | | | | | | | | | | | | |
+| Giao nhiệm vụ, yêu cầu giải trình <br>`workflow.directive.manage` |  | ✓ | ✓ |  | ✓ |  |  |  |  |  |  |  |
+| Phản hồi nhiệm vụ, giải trình <br>`workflow.directive.respond` |  |  |  |  | ✓ |  | ✓ | ✓ |  |  |  |  |
+| Trao đổi, gửi thông báo <br>`workflow.message.send` |  |  |  |  |  |  |  | ✓ |  | ✓ |  |  |
+| **report** | | | | | | | | | | | | |
+| Xem dashboard <br>`report.dashboard.view` |  | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  | ✓ | ✓ |
+| Lập/nộp báo cáo <br>`report.submission.create` |  |  |  |  | ✓ | ✓ | ✓ |  |  |  | ✓ |  |
+| Tiếp nhận/duyệt báo cáo <br>`report.submission.approve` |  | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
+| Xuất dữ liệu <br>`report.export` |  | ✓ | ✓ |  | ✓ | ✓ |  |  |  |  |  |  |
+| **survey** | | | | | | | | | | | | |
+| Xem phiếu & kết quả khảo sát <br>`survey.form.view` |  | ✓ | ✓ |  | ✓ | ✓ | ✓ |  |  |  |  |  |
+| Tạo, phát hành phiếu khảo sát <br>`survey.form.manage` |  | ✓ | ✓ |  | ✓ |  |  |  |  |  |  |  |
+| Trả lời khảo sát <br>`survey.response.submit` |  |  |  |  | ✓ |  | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| **integration** | | | | | | | | | | | | |
+| Xem kết nối & nhật ký đồng bộ <br>`integration.connector.view` | ✓ | ✓ | ✓ | ✓ |  | ✓ |  |  |  |  |  |  |
+| Cấu hình kết nối, đồng bộ dữ liệu <br>`integration.connector.manage` | ✓ |  |  | ✓ |  |  |  |  |  |  |  |  |
 | **iam** | | | | | | | | | | | | |
 | Xem tài khoản <br>`iam.account.view` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  | ✓ |  |
 | Quản trị tài khoản & gán vai trò <br>`iam.account.manage` | ✓ |  |  | ✓ |  | ✓ |  |  |  |  | ✓ |  |
@@ -47,52 +99,11 @@
 | Gửi yêu cầu liên kết con <br>`iam.guardian.request` |  |  |  |  |  |  |  |  |  | ✓ |  |  |
 | Xác minh liên kết phụ huynh <br>`iam.guardian.approve` |  |  |  |  |  | ✓ |  |  |  |  |  |  |
 | Cấp/thu hồi quyền dữ liệu cho nhà cung cấp <br>`iam.grant.manage` |  |  |  |  | ✓ | ✓ |  |  |  |  |  |  |
-| **cfg** | | | | | | | | | | | | |
-| Xem cấu hình <br>`cfg.setting.view` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |
-| Sửa cấu hình đơn vị <br>`cfg.setting.manage` | ✓ |  |  | ✓ |  | ✓ |  |  |  |  |  |  |
 | **audit** | | | | | | | | | | | | |
 | Xem nhật ký hệ thống <br>`audit.log.view` | ✓ | ✓ |  | ✓ | ✓ | ✓ |  |  |  |  |  |  |
-| **plan** | | | | | | | | | | | | |
-| Xem chỉ tiêu <br>`plan.target.view` |  | ✓ | ✓ |  | ✓ |  |  |  |  |  |  |  |
-| Ban hành/giao chỉ tiêu <br>`plan.target.manage` |  | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
-| Xem kế hoạch STEM <br>`plan.plan.view` |  | ✓ | ✓ |  | ✓ |  | ✓ | ✓ |  |  |  |  |
-| Lập/sửa kế hoạch STEM <br>`plan.plan.create` |  |  |  |  | ✓ |  | ✓ | ✓ |  |  |  |  |
-| Duyệt kế hoạch STEM <br>`plan.plan.approve` |  |  |  |  | ✓ |  | ✓ |  |  |  |  |  |
-| **activity** | | | | | | | | | | | | |
-| Xem hoạt động STEM <br>`activity.activity.view` |  | ✓ | ✓ |  | ✓ |  | ✓ | ✓ | ✓ |  |  |  |
-| Ghi nhận hoạt động STEM <br>`activity.activity.create` |  |  |  |  |  |  |  | ✓ |  |  |  |  |
-| Duyệt hoạt động/minh chứng <br>`activity.activity.approve` |  |  |  |  | ✓ |  | ✓ |  |  |  |  |  |
-| **resource** | | | | | | | | | | | | |
-| Xem phòng & thiết bị <br>`resource.room.view` |  | ✓ | ✓ |  | ✓ | ✓ | ✓ | ✓ |  |  |  |  |
-| Quản trị phòng & thiết bị <br>`resource.room.manage` |  |  |  |  |  | ✓ |  |  |  |  |  |  |
-| Đặt phòng/thiết bị <br>`resource.booking.create` |  |  |  |  |  |  |  | ✓ |  |  |  |  |
-| Duyệt đặt phòng/xử lý xung đột <br>`resource.booking.approve` |  |  |  |  | ✓ | ✓ |  |  |  |  |  |  |
-| **assess** | | | | | | | | | | | | |
-| Xem nhiệm vụ/dự án <br>`assess.task.view` |  |  |  |  | ✓ |  | ✓ | ✓ | ✓ |  |  |  |
-| Giao nhiệm vụ/dự án <br>`assess.task.create` |  |  |  |  |  |  |  | ✓ |  |  |  |  |
-| Nộp bài/sản phẩm <br>`assess.task.submit` |  |  |  |  |  |  |  |  | ✓ |  |  |  |
-| Đánh giá, nhận xét <br>`assess.evaluation.create` |  |  |  |  |  |  |  | ✓ |  |  |  |  |
-| **training** | | | | | | | | | | | | |
-| Xem tập huấn <br>`training.course.view` |  | ✓ | ✓ |  | ✓ |  | ✓ | ✓ |  |  |  | ✓ |
-| Quản lý tập huấn <br>`training.course.manage` |  |  | ✓ |  | ✓ |  |  |  |  |  | ✓ |  |
-| **provider** | | | | | | | | | | | | |
-| Quản lý hồ sơ nhà cung cấp <br>`provider.profile.manage` |  |  |  |  |  |  |  |  |  |  | ✓ |  |
-| Xem sản phẩm/học liệu đã công bố <br>`provider.offering.view` |  | ✓ | ✓ |  | ✓ |  | ✓ | ✓ |  |  | ✓ | ✓ |
-| Tạo/sửa sản phẩm, học liệu <br>`provider.offering.create` |  |  |  |  |  |  |  |  |  |  | ✓ | ✓ |
-| Thẩm định/công bố sản phẩm, học liệu <br>`provider.offering.approve` |  | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
-| Xem tiến độ triển khai <br>`provider.deployment.view` |  | ✓ | ✓ |  | ✓ |  |  |  |  |  | ✓ | ✓ |
-| Xử lý yêu cầu hỗ trợ <br>`provider.ticket.handle` |  |  |  |  |  |  |  |  |  |  | ✓ | ✓ |
-| **report** | | | | | | | | | | | | |
-| Xem dashboard <br>`report.dashboard.view` |  | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  | ✓ | ✓ |
-| Lập/nộp báo cáo <br>`report.submission.create` |  |  |  |  | ✓ | ✓ | ✓ |  |  |  | ✓ |  |
-| Tiếp nhận/duyệt báo cáo <br>`report.submission.approve` |  | ✓ | ✓ |  |  |  |  |  |  |  |  |  |
-| Xuất dữ liệu <br>`report.export` |  | ✓ | ✓ |  | ✓ | ✓ |  |  |  |  |  |  |
-| Giao nhiệm vụ/yêu cầu giải trình <br>`report.directive.manage` |  | ✓ | ✓ |  | ✓ |  |  |  |  |  |  |  |
-| Phản hồi nhiệm vụ/giải trình <br>`report.directive.respond` |  |  |  |  | ✓ |  | ✓ | ✓ |  |  |  |  |
-| **portal** | | | | | | | | | | | | |
-| Xem tình hình học tập của con <br>`portal.child.view` |  |  |  |  |  |  |  |  |  | ✓ |  |  |
-| Trao đổi với nhà trường <br>`portal.message.send` |  |  |  |  |  |  |  | ✓ |  | ✓ |  |  |
-| Đăng ký hoạt động/sự kiện <br>`portal.event.register` |  |  |  |  |  |  |  |  | ✓ | ✓ |  |  |
+| **cfg** | | | | | | | | | | | | |
+| Xem cấu hình, bản đồ phân hệ, từ điển dữ liệu <br>`cfg.setting.view` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |  |  |  |  |  |
+| Sửa cấu hình, bật/tắt phân hệ <br>`cfg.setting.manage` | ✓ |  |  | ✓ |  | ✓ |  |  |  |  |  |  |
 
 ## 4. Hàm phạm vi (supabase/migrations/20261015000200_iam.sql)
 

@@ -1,15 +1,12 @@
 import { Check } from "lucide-react";
 import type { AccessContext } from "@/domain/access";
-import { MODULES } from "@/domain/navigation";
+import { PERMISSION_GROUP_LABEL } from "@/domain/modules";
 import { ALL_PERMISSIONS, PERMISSIONS } from "@/domain/permissions";
 import { SYSTEM_ROLES } from "@/domain/roles";
 import { PageHeader, Section } from "@/components/layout/page";
 import { cn } from "@/lib/utils";
 
-const MODULE_LABEL: Record<string, string> = {
-  org: "Tổ chức", iam: "Tài khoản & phân quyền", cfg: "Cấu hình", audit: "Nhật ký",
-  ...Object.fromEntries(Object.entries(MODULES).map(([k, v]) => [k, v.name])),
-};
+const MODULE_LABEL = PERMISSION_GROUP_LABEL;
 
 const SCOPE_LABEL: Record<string, string> = {
   PLATFORM: "Nền tảng", UNIT_SUBTREE: "Đơn vị & cấp dưới", TEACHING: "Lớp được phân công", SELF: "Bản thân",

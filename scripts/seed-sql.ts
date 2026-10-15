@@ -1,6 +1,13 @@
 import { PERMISSIONS } from "../src/domain/permissions.ts";
 import { SYSTEM_ROLES } from "../src/domain/roles.ts";
 import { createDemoDataset } from "../src/demo/seed.ts";
+import { readFileSync } from "node:fs";
+import { FIELD_MAPPINGS } from "../src/domain/dictionary/mapping.ts";
+import type { Dictionary } from "../src/domain/dictionary/types.ts";
+
+export function loadDictionary(): Dictionary {
+  return JSON.parse(readFileSync(new URL("../src/domain/dictionary/qd2768.json", import.meta.url), "utf8")) as Dictionary;
+}
 
 export const DEMO_PASSWORD = "Demo@2026";
 
@@ -20,6 +27,7 @@ function rows(table: string, cols: string[], values: unknown[][]): string {
 
 export function buildSeedSql(): string {
   const ds = createDemoDataset();
+  const dict = loadDictionary();
   const parts: string[] = [
     "-- =====================================================================",
     "-- FILE SINH TỰ ĐỘNG bởi scripts/gen-seed.ts — KHÔNG SỬA TAY.",
@@ -33,6 +41,15 @@ export function buildSeedSql(): string {
       SYSTEM_ROLES.map((r) => [lit(r.code), lit(r.name), lit(r.portal), lit(r.scope), `array[${r.unitTypes.map(lit).join(", ")}]`, "true"])),
     rows("iam.role_permission", ["role_code", "permission_code"],
       SYSTEM_ROLES.flatMap((r) => [...new Set(r.permissions)].map((p) => [lit(r.code), lit(p)]))),
+    "",
+    "-- Từ điển dữ liệu dùng chung ngành GDĐT — QĐ 2768/QĐ-BGDĐT (phiên bản 1.0)",
+    rows("cfg.data_domain", ["code", "level", "grp", "name", "parent_name", "description"],
+      dict.domains.map((d) => [lit(d.code), lit(d.level), lit(d.group), lit(d.name), lit(d.parent), lit(d.description)])),
+    rows("cfg.data_term", ["code", "name", "definition", "context", "domains", "technical_name", "data_type", "data_type_vi", "length", "core_code"],
+      dict.terms.map((t) => [lit(t.code), lit(t.name), lit(t.definition), lit(t.context), `array[${t.domains.map(lit).join(", ")}]::text[]`,
+        lit(t.technicalName), lit(t.dataType), lit(t.dataTypeVi), lit(t.length), lit(t.coreCode)])),
+    rows("cfg.data_term_mapping", ["table_name", "column_name", "term_code", "status", "note"],
+      FIELD_MAPPINGS.flatMap((m) => m.terms.map((t) => [lit(m.table), lit(m.column), lit(t), lit(m.status), lit(m.note)]))),
     "",
     "-- Người & dữ liệu cá nhân (giả định)",
     rows("iam.person", ["id", "full_name", "gender"], ds.persons.map((p) => [lit(p.id), lit(p.fullName), lit(p.gender)])),
@@ -48,15 +65,15 @@ export function buildSeedSql(): string {
     ordered.push(...pending.splice(i, 1));
   }
   for (const u of ordered) {
-    parts.push(rows("org.unit", ["id", "parent_id", "type", "code", "name", "ward", "school_level", "status"],
-      [[lit(u.id), lit(u.parentId), lit(u.type), lit(u.code), lit(u.name), lit(u.ward), lit(u.schoolLevel), lit(u.status)]]).trimEnd());
+    parts.push(rows("org.unit", ["id", "parent_id", "type", "code", "name", "ward", "school_level", "ma_dinh_danh", "loai_hinh_csgd", "tinh_thanh", "status"],
+      [[lit(u.id), lit(u.parentId), lit(u.type), lit(u.code), lit(u.name), lit(u.ward), lit(u.schoolLevel), lit(u.maDinhDanh), lit(u.loaiHinhCsgd), lit(u.tinhThanh), lit(u.status)]]).trimEnd());
   }
   parts.push(
     "",
     rows("org.academic_year", ["id", "code", "start_date", "end_date", "is_current"],
       ds.years.map((y) => [lit(y.id), lit(y.code), lit(y.startDate), lit(y.endDate), lit(y.isCurrent)])),
-    rows("org.class", ["id", "school_id", "department_id", "academic_year_id", "name", "grade", "homeroom_person_id"],
-      ds.classes.map((c) => [lit(c.id), lit(c.schoolId), lit(c.departmentId), lit(c.academicYearId), lit(c.name), lit(c.grade), lit(c.homeroomPersonId)])),
+    rows("org.class", ["id", "school_id", "department_id", "academic_year_id", "ma_lop", "name", "grade", "homeroom_person_id"],
+      ds.classes.map((c) => [lit(c.id), lit(c.schoolId), lit(c.departmentId), lit(c.academicYearId), lit(c.maLop), lit(c.name), lit(c.grade), lit(c.homeroomPersonId)])),
     rows("org.staff_membership", ["person_id", "unit_id", "position"], ds.staff.map((s) => [lit(s.personId), lit(s.unitId), lit(s.position)])),
     rows("org.teaching_assignment", ["person_id", "class_id", "subject"], ds.teaching.map((t) => [lit(t.personId), lit(t.classId), lit(t.subject)])),
     rows("org.enrollment", ["student_person_id", "class_id", "status", "student_code"],

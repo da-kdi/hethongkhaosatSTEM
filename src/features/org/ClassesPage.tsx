@@ -5,6 +5,8 @@ import { studentsOfClass, teachersOfClass, visibleClasses } from "@/app/queries"
 import type { AccessContext } from "@/domain/access";
 import { Empty, PageHeader, Section, TableWrap, td, th } from "@/components/layout/page";
 import { cn } from "@/lib/utils";
+import { Term } from "@/components/term";
+import { GENDER_ISO_5218 } from "@/domain/dictionary/mapping";
 
 export function ClassesPage({ access }: { access: AccessContext }) {
   const { ds } = useStore();
@@ -34,7 +36,7 @@ export function ClassesPage({ access }: { access: AccessContext }) {
               <Section
                 key={c.id}
                 title={`Lớp ${c.name}`}
-                description={`${students.length} học sinh${homeroom ? ` · GVCN: ${homeroom.fullName}` : ""}${teachers.length ? ` · ${teachers.map((t) => `${t.subject}: ${t.name}`).join("; ")}` : ""}`}
+                description={`${c.maLop ? `Mã lớp ${c.maLop} · ` : ""}${students.length} học sinh${homeroom ? ` · GVCN: ${homeroom.fullName}` : ""}${teachers.length ? ` · ${teachers.map((t) => `${t.subject}: ${t.name}`).join("; ")}` : ""}`}
                 actions={
                   <button type="button" onClick={() => setOpen(isOpen ? null : c.id)} aria-expanded={isOpen} className="rounded-md p-1 hover:bg-muted" aria-label={isOpen ? "Thu gọn" : "Mở rộng"}>
                     <ChevronDown className={cn("size-4 transition-transform", isOpen && "rotate-180")} />
@@ -46,9 +48,10 @@ export function ClassesPage({ access }: { access: AccessContext }) {
                   <thead>
                     <tr>
                       <th className={th}>Mã HS</th>
-                      <th className={th}>Họ tên</th>
-                      <th className={th}>Ngày sinh</th>
-                      <th className={th}>Điện thoại liên hệ</th>
+                      <th className={th}><Term code="BG_00007">Họ và tên</Term></th>
+                      <th className={th}><Term code="BG_00010">Giới tính</Term></th>
+                      <th className={th}><Term code="BG_00009">Ngày sinh</Term></th>
+                      <th className={th}><Term code="BG_00043">Điện thoại</Term></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -58,6 +61,7 @@ export function ClassesPage({ access }: { access: AccessContext }) {
                         <tr key={person.id}>
                           <td className={`${td} font-mono text-xs`}>{enrollment.studentCode}</td>
                           <td className={td}>{person.fullName}</td>
+                          <td className={td} title={person.gender ? `gioiTinh = ${GENDER_ISO_5218[person.gender]} (ISO/IEC 5218)` : undefined}>{person.gender === "NU" ? "Nữ" : person.gender === "NAM" ? "Nam" : "—"}</td>
                           <td className={td}>{personal ? person.birthDate : <Hidden />}</td>
                           <td className={td}>{personal ? person.phone : <Hidden />}</td>
                         </tr>

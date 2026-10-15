@@ -12,6 +12,12 @@ export interface OrgUnit {
   /** Xã/phường — thuộc tính địa bàn để lọc, không phải cấp quản lý */
   ward?: string;
   schoolLevel?: SchoolLevel;
+  /** BG_00419 truongId (trường, ≤15) / BG_00420 maDinhDanhToChuc */
+  maDinhDanh?: string;
+  /** BG_00429 loaiHinhCsgd — chờ danh mục chuẩn */
+  loaiHinhCsgd?: string;
+  /** BG_00426 tinhThanhCsgd */
+  tinhThanh?: string;
   status: "ACTIVE" | "INACTIVE";
 }
 
@@ -29,7 +35,11 @@ export interface ClassRoom {
   /** Tổ quản lý chuyên môn (nếu có) */
   departmentId?: string;
   academicYearId: string;
+  /** BG_00504 maLop */
+  maLop?: string;
+  /** BG_00505 tenLop */
   name: string;
+  /** BG_00506 khoi */
   grade: number;
   homeroomPersonId?: string;
 }
@@ -148,6 +158,14 @@ export interface TodoItem {
   severity: "info" | "warning" | "danger";
 }
 
+/** Tiến trình 5 bước triển khai đề án của một đơn vị trong năm học (P0 · Định hướng & kế hoạch). */
+export type StepStatus = "DONE" | "IN_PROGRESS" | "NOT_STARTED";
+export interface DeAnProgress {
+  unitId: string;
+  academicYearId: string;
+  steps: { no: 1 | 2 | 3 | 4 | 5; status: StepStatus; items: { label: string; module: string; done: boolean }[] }[];
+}
+
 export interface Dataset {
   units: OrgUnit[];
   years: AcademicYear[];
@@ -164,4 +182,5 @@ export interface Dataset {
   labels: TermLabel[];
   audit: AuditEntry[];
   todos: TodoItem[];
+  deAn: DeAnProgress[];
 }

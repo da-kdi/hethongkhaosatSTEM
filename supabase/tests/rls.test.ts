@@ -8,7 +8,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type pg from "pg";
 import { asUser, createTestDb, dropTestDb, ADMIN_URL } from "./db.ts";
 import { buildAccess } from "../../src/domain/access.ts";
-import { A, createDemoDataset, DEMO_TODAY, R, U } from "../../src/demo/seed.ts";
+import { A, createDemoDataset, DEMO_TODAY, P, R, U } from "../../src/demo/seed.ts";
 
 const DB = "stem_test_rls";
 const ds = createDemoDataset();
@@ -160,6 +160,44 @@ describe.skipIf(!ADMIN_URL)("RLS · Postgres", () => {
       const gv = await asUser(pool, { sub: A.bmAnh, active_assignment_id: R.bmAnh }, (q) =>
         q<{ module: string; enabled: boolean }>("select * from cfg.my_modules()"));
       expect(gv.find((m) => m.module === "resource")?.enabled).toBe(true);
+    });
+
+    it("từ điển QĐ 2768: người dùng có ngữ cảnh đọc được, chưa chọn ngữ cảnh thì không", async () => {
+      const n = await asUser(pool, { sub: A.bmHuong, active_assignment_id: R.bmHuong }, async (q) =>
+        (await q<{ n: string }>("select count(*)::text as n from cfg.data_term"))[0].n);
+      expect(n).toBe("892");
+      const none = await asUser(pool, { sub: A.bmHuong }, async (q) => (await q("select 1 from cfg.data_term")).length);
+      expect(none).toBe(0);
+      const mapped = await asUser(pool, { sub: A.bmHuong, active_assignment_id: R.bmHuong }, (q) =>
+        q<{ technical_name: string }>(`select t.technical_name from cfg.data_term_mapping m join cfg.data_term t on t.code = m.term_code
+           where m.table_name = 'org.class' and m.column_name = 'ma_lop'`));
+      expect(mapped.map((r) => r.technical_name)).toEqual(["maLop"]);
+    });
+
+    it("ràng buộc định dạng theo chuẩn: số định danh cá nhân 12 số, mã định danh trường ≤ 15 ký tự", async () => {
+      const client = await pool.connect();
+      try {
+        await client.query("begin");
+        await expect(client.query("update iam.person_private set so_dinh_danh_ca_nhan = '12345' where person_id = $1", [P.bmPrincipal]))
+          .rejects.toThrow(/check constraint/);
+        await client.query("rollback");
+        await client.query("begin");
+        await expect(client.query("update org.unit set ma_dinh_danh = 'AH0001020100000X' where id = $1", [U.bm]))
+          .rejects.toThrow(/check constraint/);
+      } finally {
+        await client.query("rollback");
+        client.release();
+      }
+    });
+
+    it("cfg.my_modules trả đúng 8 phân hệ bật/tắt được; Sở bắt buộc Khảo sát nên trường không tắt được", async () => {
+      const mods = await asUser(pool, { sub: A.bmPrincipal, active_assignment_id: R.bmPrincipal }, (q) =>
+        q<{ module: string }>("select module from cfg.my_modules()"));
+      expect(mods.map((m) => m.module).sort()).toEqual(["assess", "integration", "program", "resource", "schedule", "session", "survey", "training"]);
+      await expect(
+        asUser(pool, { sub: A.bmAdmin, active_assignment_id: R.bmAdmin }, (q) =>
+          q("select cfg.set_setting($1, 'module.survey', '{\"enabled\": false}', 'AUTONOMOUS')", [U.bm])),
+      ).rejects.toThrow(/đã bị cấp trên khóa/);
     });
 
     it("grant NCC hết hạn: trước hạn thấy lớp, sau hạn không thấy", async () => {

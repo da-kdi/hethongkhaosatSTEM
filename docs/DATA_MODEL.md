@@ -46,12 +46,35 @@ Nguồn: `supabase/migrations/*.sql`. Kiểu TS tương ứng: `src/domain/model
 | `cfg.setting_history` | bản sao mỗi lần đổi | Xem lịch sử phiên bản |
 | `cfg.term_label` | (`unit_id`, `key`), `label` | Đổi thuật ngữ, ví dụ "Tổ" ↔ "Tổ bộ môn" |
 
-Khóa cấu hình đang dùng: `module.<code>` → `{enabled}`; `catalog.activity_types` → mảng (EXTEND); `wf.activity.dept_review` → `{enabled}`.
+Khóa cấu hình đang dùng: `module.<code>` → `{enabled}`; `catalog.activity_types` → mảng (EXTEND); `wf.session.dept_review` → `{enabled}`.
 
 ### audit
 | Bảng | Cột chính | Ghi chú |
 |---|---|---|
 | `audit.log` | `at`, `actor_account`, `active_assignment`, `action`, `entity`, `entity_id`, `unit_id`, `summary jsonb` | Trigger chặn UPDATE/DELETE/TRUNCATE |
+
+### cfg — Từ điển dữ liệu ngành (QĐ 2768/QĐ-BGDĐT, migration 0006)
+| Bảng | Nội dung |
+|---|---|
+| `cfg.data_domain` | 41 miền dữ liệu MOET01–41 (Phụ lục 01): cấp, nhóm (Con người/Tổ chức), miền cha |
+| `cfg.data_term` | 892 thuật ngữ BG_00001–00892 (Phụ lục 02): tên nghiệp vụ, định nghĩa, ngữ cảnh, miền, **tên kỹ thuật**, kiểu, độ dài, mã cốt lõi CDE |
+| `cfg.data_term_mapping` | Cột hệ thống ↔ thuật ngữ, trạng thái EXACT/PARTIAL, ghi chú quy đổi |
+
+**Cột chuẩn bổ sung ở 0006:**
+
+| Cột | Thuật ngữ | Ràng buộc |
+|---|---|---|
+| `org.unit.ma_dinh_danh` | BG_00419 `truongId` / BG_00420 `maDinhDanhToChuc` | ≤35 ký tự; trường ≤15; duy nhất |
+| `org.unit.loai_hinh_csgd` | BG_00429 `loaiHinhCsgd` | chờ danh mục |
+| `org.unit.tinh_thanh` | BG_00426 `tinhThanhCsgd` | chuẩn là mã CDE-DC-001 |
+| `org.class.ma_lop` | BG_00504 `maLop` | ≤20 ký tự |
+| `iam.person_private.so_dinh_danh_ca_nhan` | BG_00011 `soDinhDanhCaNhan` (CDE-CN-001) | đúng 12 chữ số; dữ liệu nhạy cảm |
+| `iam.person_private.dan_toc` | BG_00027 `danToc` (CDE-CN-004) | ≤2 ký tự |
+| `iam.person_private.quoc_tich` | BG_00026 `quocTich` (CDE-CN-003) | ≤2 ký tự |
+
+Mọi cột đã ánh xạ có `COMMENT ON COLUMN` ghi mã BG và tên kỹ thuật. Danh sách đầy đủ: `src/domain/dictionary/mapping.ts` hoặc trang "Từ điển dữ liệu ngành".
+
+**Quy ước trao đổi dữ liệu:** import/export, API tích hợp và báo cáo gửi Sở/Bộ dùng **tên kỹ thuật chuẩn** làm tên cột/khóa JSON. Giá trị đã có chuẩn mã thì quy đổi khi xuất, ví dụ `gioiTinh` theo ISO/IEC 5218: NAM→`1`, NU→`2`. QĐ 2768 chưa ban hành danh sách giá trị cho các thuộc tính kiểu danh mục, nên các cột này để trạng thái PARTIAL.
 
 ## Sơ đồ quan hệ (M1)
 
@@ -81,7 +104,7 @@ erDiagram
 
 ## Bảng dự kiến (M2+)
 
-Xem `ARCHITECTURE_PLAN.md` §3.2: `catalog.*`, `wf.definition/instance/step_log/directive`, `plan.indicator/target_set/target_allocation/stem_plan/plan_item`, `activity.lesson_plan/stem_activity/evidence/participation`, `resource.*`, `training.*`, `provider.*`, `assess.*`, `portal.*`, `report.metric/metric_snapshot/period/submission/dq_issue`, `file.object`.
+Theo 14 phân hệ (ARCHITECTURE_PLAN §V2.2). Mỗi phân hệ một schema; khi tạo bảng mới phải ánh xạ cột sang thuật ngữ QĐ 2768 ngay trong `mapping.ts`. Danh sách dự kiến từ §3.2, bổ sung `survey.*` (phiếu, câu hỏi, phát hành, câu trả lời), `session.*` (buổi dạy, check-in, điểm danh, nhật ký), `resource.stock_*` (nhập–xuất–tồn), `schedule.*` (kế hoạch dạy học, lịch, đặt chỗ), `dw.*` (kho phân tích): `catalog.*`, `wf.definition/instance/step_log/directive`, `plan.indicator/target_set/target_allocation/stem_plan/plan_item`, `activity.lesson_plan/stem_activity/evidence/participation`, `resource.*`, `training.*`, `provider.*`, `assess.*`, `portal.*`, `report.metric/metric_snapshot/period/submission/dq_issue`, `file.object`.
 
 ## Quy ước
 

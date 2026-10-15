@@ -5,7 +5,7 @@ import { actions, useStore } from "@/app/store";
 import { ancestorsOf, subtreeIds, type AccessContext } from "@/domain/access";
 import { canWriteSetting, resolveSetting, type ResolvedSetting } from "@/domain/config";
 import type { ConfigMode, Dataset, OrgUnit } from "@/domain/model";
-import { MODULES, type ModuleCode } from "@/domain/navigation";
+import { MODULE_LIST, MODULES, type ModuleCode } from "@/domain/modules";
 import { UNIT_TYPE_LABEL } from "@/app/queries";
 import { PageHeader, Section } from "@/components/layout/page";
 import { Badge } from "@/components/ui/badge";
@@ -71,7 +71,7 @@ export function ConfigPage({ access }: { access: AccessContext }) {
   return (
     <div>
       <PageHeader
-        title="Module & cấu hình"
+        title="Phân hệ & cấu hình"
         description="Cấu hình kế thừa theo tầng Nền tảng → Sở → Trường → Tổ. Cấp trên đặt “Bắt buộc” thì cấp dưới không sửa được; “Kế thừa & mở rộng” cho phép cấp dưới thêm nhưng không xóa."
         actions={
           candidates.length > 1 ? (
@@ -101,13 +101,12 @@ export function ConfigPage({ access }: { access: AccessContext }) {
 
       <div className="grid gap-4">
         <Section
-          title={`Module · ${unit.name}`}
-          description={`${UNIT_TYPE_LABEL[unit.type]}. Tắt module sẽ ẩn menu và chặn truy cập ở đơn vị này và mọi tổ trực thuộc, không ảnh hưởng đơn vị khác.`}
+          title={`Phân hệ · ${unit.name}`}
+          description={`${UNIT_TYPE_LABEL[unit.type]}. Tắt phân hệ sẽ ẩn menu và chặn truy cập ở đơn vị này và mọi tổ trực thuộc, không ảnh hưởng đơn vị khác. Các phân hệ nền tảng (0, 4, 8, 0.1, 0.4, 0.5) luôn bật.`}
         >
           <ul className="divide-y">
-            {(Object.keys(MODULES) as ModuleCode[])
-              .filter((m) => MODULES[m].canDisable)
-              .map((code) => {
+            {MODULE_LIST.filter((m) => m.canDisable)
+              .map(({ code }) => {
                 const key = `module.${code}`;
                 const r = resolveSetting<{ enabled?: boolean }>(ds.settings, chain, key);
                 const enabled = r.value?.enabled ?? true;
@@ -117,10 +116,12 @@ export function ConfigPage({ access }: { access: AccessContext }) {
                   <li key={code} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center">
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-sm font-medium">{MODULES[code].name}</span>
+                        <span className="text-sm font-medium">{MODULES[code].no} · {MODULES[code].name}</span>
                         {enabled ? <Badge variant="success">Đang bật</Badge> : <Badge variant="muted">Đang tắt</Badge>}
                       </div>
-                      <p className="mt-0.5 text-xs text-muted-foreground">{MODULES[code].description}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {MODULES[code].description} <span className="whitespace-nowrap">· Bước {MODULES[code].steps.join(", ")}</span>
+                      </p>
                       <SourceNote ds={ds} r={r} unitId={unitId} />
                     </div>
                     <div className="flex items-center gap-4">
@@ -217,13 +218,13 @@ function CatalogEditor({ ds, unitId, chain, editable }: { ds: Dataset; unitId: s
 
 /** Tham số quy trình — minh họa chế độ AUTONOMOUS: trường tự quyết có bước Tổ duyệt hay không. */
 function WorkflowParams({ ds, unitId, chain, editable }: { ds: Dataset; unitId: string; chain: OrgUnit[]; editable: boolean }) {
-  const key = "wf.activity.dept_review";
+  const key = "wf.session.dept_review";
   const r = resolveSetting<{ enabled?: boolean }>(ds.settings, chain, key);
   const enabled = r.value?.enabled ?? true;
   const writable = editable && canWriteSetting(ds.settings, chain, key);
   const mode = ds.settings.find((s) => s.unitId === unitId && s.key === key)?.mode ?? "AUTONOMOUS";
   return (
-    <Section title="Quy trình duyệt hoạt động & minh chứng" description="Trạng thái lõi (Nháp → Chờ duyệt → Đã duyệt) do Sở quy định. Trường được bật/tắt bước Tổ rà soát.">
+    <Section title="Quy trình duyệt buổi dạy & minh chứng (phân hệ 6 · 8)" description="Trạng thái lõi (Nháp → Chờ duyệt → Đã duyệt) do Sở quy định. Trường được bật/tắt bước Tổ rà soát.">
       <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1">
           <div className="text-sm font-medium">Bước Tổ chuyên môn rà soát</div>
@@ -239,7 +240,7 @@ function WorkflowParams({ ds, unitId, chain, editable }: { ds: Dataset; unitId: 
           onCheckedChange={(v) => tryDo(() => actions.setSetting(unitId, key, { enabled: v }, mode), v ? "Đã bật bước Tổ rà soát" : "Đã tắt bước Tổ rà soát")}
         />
       </div>
-      <p className="mt-4 text-xs text-muted-foreground">Quy trình chạy thật với tham số này có ở M3.</p>
+      <p className="mt-4 text-xs text-muted-foreground">Bộ máy quy trình (phân hệ 8) chạy thật với tham số này từ M3.</p>
     </Section>
   );
 }

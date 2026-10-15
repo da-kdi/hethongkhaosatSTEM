@@ -1,11 +1,117 @@
-# Nền tảng Quản trị STEM đa cấp — Phân tích & Kế hoạch kiến trúc (v0.1)
+# Nền tảng Quản trị STEM đa cấp — Phân tích & Kế hoạch kiến trúc (v0.2)
 
-> Trạng thái: **ĐÃ DUYỆT (15/10/2026)**, triển khai trong repo này. Tiến độ: M0 ✅ · M1 ✅ (chế độ demo + lớp DB đã kiểm thử) · M1b (adapter Supabase) ⏭ · M2 ⏭.
+> Trạng thái: **ĐÃ DUYỆT (15/10/2026)**, triển khai trong repo này. Tiến độ: M0 ✅ · M1 ✅ · Tái cấu trúc v0.2 (14 phân hệ + QĐ 2768) ✅ trên nhánh `restructure/14-phan-he` · M1b ⏭ · M2 ⏭.
 > Các quyết định D1–D7 đang áp dụng mặc định như khuyến nghị, xem `docs/DECISIONS.md`.
 > Đầu vào: `STEM_PLATFORM_PRODUCT_BRIEF.md`, `PROMPT_FOR_CLAUDE.md`, video ghi màn hình hệ thống tham khảo (8 phút 43 giây), repo `da-kdi/stemtown-preview`.
-> Ngày: 15/10/2026
+> Ngày: 15/10/2026 · cập nhật v0.2: 16/10/2026
 
 ---
+
+## CẬP NHẬT v0.2 (16/10/2026): Tái cấu trúc 14 phân hệ × 5 bước đề án × Từ điển dữ liệu ngành
+
+> Đầu vào bổ sung: hình **Kiến trúc tổng thể** (3 tầng + 2 nền, "14 phân hệ"), hình **Phân hệ theo tầng** (Sở ↔ Trường, phân hệ 1–8 và 0.1–0.5), **quy trình 5 bước triển khai đề án**, và **QĐ 2768/QĐ-BGDĐT** ngày 18/9/2026 ban hành Từ điển dữ liệu dùng chung ngành GDĐT (41 miền dữ liệu, 892 thuật ngữ).
+> Phần v0.2 **thay thế** §1.3 (danh sách module), §2 (menu) và §7 (roadmap) của v0.1. Các phần còn lại vẫn hiệu lực.
+> Nguồn chân lý trong code: `src/domain/modules.ts` (phân hệ, bước, tầng), `src/domain/navigation.ts` (menu), `src/domain/dictionary/*` (từ điển & ánh xạ).
+
+### V2.1 Kiến trúc tổng thể → công nghệ
+
+| Tầng (hình 1) | Thành phần | Hiện thực |
+|---|---|---|
+| **Tầng trên · Giao diện** | Web app / Mobile app; Online + **Offline** (đồng bộ khi có mạng) | React SPA responsive (đang có) → **PWA** có hàng đợi ngoại tuyến cho điểm danh, nhật ký buổi dạy (M7) |
+| | Phân tích & báo cáo (Dashboard/BI) | Dashboard trong ứng dụng (0.1); **Power BI** đọc kho phân tích (M9) |
+| **Tầng giữa · Xử lý nghiệp vụ** | Nghiệp vụ & API: 14 phân hệ | Mỗi phân hệ một schema Postgres + RPC `security definer` (hợp đồng công khai) |
+| | Tích hợp hệ thống (LMS, nội bộ, bên ngoài) | Edge Functions + ánh xạ theo **QĐ 2768** (`cfg.data_term_mapping`) |
+| | Tác vụ nền (thông báo, báo cáo, đồng bộ) | `pg_cron` + Edge Functions, hàng đợi |
+| **Tầng dưới · Dữ liệu dùng chung** | Cơ sở dữ liệu PostgreSQL / Cloud SQL | Supabase Postgres (hoặc self-host, chờ D7) |
+| | Kho tài liệu (object storage, CDN) | Supabase Storage + CDN: minh chứng, học liệu, sản phẩm HS |
+| | Kho phân tích (data warehouse) | Schema `dw` dạng star schema (fact buổi dạy, điểm danh, đánh giá, khảo sát…) |
+| **Nền** | Định danh & bảo mật | Auth + RLS theo vai trò × phạm vi × quan hệ, ngữ cảnh vai trò, nhật ký append-only, PII tách bảng |
+| | Hạ tầng vận hành | CI/CD (GitHub Actions), giám sát, sao lưu PITR |
+
+### V2.2 Mười bốn phân hệ
+
+Hình phân hệ có 13 ô. Hình kiến trúc ghi "14 phân hệ". Thứ còn thiếu là **Bước 1–2 của đề án (Định hướng từ Sở, Lập kế hoạch)**, vốn có ở v0.1 dưới tên "Kế hoạch & chỉ tiêu". Vì vậy bổ sung **Phân hệ 0** làm phân hệ thứ 14 (**cần xác nhận**, ADR-009).
+
+| Tầng | Số | Phân hệ | Chi tiết bên trong | Bước | Miền QĐ 2768 | Mốc |
+|---|---|---|---|---|---|---|
+| 0 · Định hướng | **0** | Định hướng & kế hoạch đề án *(bổ sung)* | Đề án năm học cấp tỉnh; bộ chỉ số, giao chỉ tiêu; trường tiếp nhận/kiến nghị; kế hoạch STEM của trường; tiến trình 5 bước | 1, 2, 5 | MOET30, 34 | M3 |
+| 1 · Đào tạo GV | **1** | Đào tạo & đánh giá năng lực GV | Nhu cầu & kế hoạch bồi dưỡng; khóa tập huấn, ghi danh, điểm danh; chứng chỉ; xếp loại năng lực (gắn chuẩn nghề nghiệp) | 2, 3, 4 | MOET19, 22, 24 | M5 |
+| 2 · Chương trình | **2** | Chương trình & học liệu STEM | Khung CT theo cấp/khối/môn; chủ đề, bài học, KHBD mẫu; thư viện học liệu có phiên bản; thẩm định & công bố | 1, 2, 3 | MOET39, 40 | M5 |
+| 3 · Thiết bị | **3** | Thiết bị, vật tư & phòng STEM | Phòng STEM/thí nghiệm/xưởng; thiết bị, tài sản, nguyên giá; vật tư **nhập–xuất–tồn**; bảo trì, bảo hành; kiểm kê | 2, 3, 4 | MOET32 | M6 |
+| 4 · Vận hành dạy học | **4** | Tổ chức dạy học | Hồ sơ CSGD, điểm trường; cán bộ/nhà giáo, tổ; người học, lớp, khối; PH & liên kết; phân công | 2 | MOET07, 10, 18, 20, 30, 31 | M2 (một phần đã có) |
+| | **5** | Kế hoạch & lịch dạy | Kế hoạch dạy học từ khung CT (2); phân công GV/phòng/thiết bị (3); lịch & xung đột; mượn thiết bị; sự kiện | 2, 3 | MOET31 | M6 |
+| | **6** | Buổi dạy & điểm danh | Check-in GV; điểm danh HS; nhật ký, minh chứng; ghi nhận vật tư đã dùng; **ngoại tuyến** | 3 | MOET11, 31 | M7 |
+| | **7** | Đánh giá năng lực & sản phẩm | Rubric năng lực/phẩm chất; mức đạt, điểm ĐGTX/ĐGĐK, nhận xét; sản phẩm, dự án; hồ sơ năng lực | 4 | MOET11, 16 | M7 |
+| Xuyên suốt | **8** | Quy trình & thông báo | Bộ máy phê duyệt; nhắc việc, SLA; cảnh báo; giao nhiệm vụ/giải trình; thông báo in-app/email/app | 1–5 | MOET05 | M3 |
+| 5 · Quản lý vận hành | **0.1** | Dashboard & báo cáo | Dashboard theo vai trò; kỳ báo cáo; tổng hợp lên Sở; chất lượng dữ liệu; **đề xuất cải tiến** | 4, 5 | MOET33, 34 | M8 |
+| | **0.2** | Khảo sát | Ngân hàng câu hỏi; mẫu của Sở (bắt buộc) + câu riêng của trường; phát hành theo đối tượng; tổng hợp | 1, 4, 5 | MOET34 | M4 |
+| | **0.3** | Tích hợp dữ liệu & AI | Kết nối LMS/CSDL ngành/nội bộ; ánh xạ QĐ 2768; đồng bộ & đối soát; kho phân tích; trợ lý AI có kiểm quyền | 5 | MOET34 | M9 |
+| | **0.4** | Người dùng & phân quyền | Đơn vị, tài khoản, vai trò, ngữ cảnh; quyền NCC; nhật ký | 1–5 | MOET29, 30 | ✅ |
+| | **0.5** | Quản trị nền tảng | Cấu hình kế thừa; bật/tắt phân hệ; danh mục; **từ điển dữ liệu**; thuật ngữ | 1 | MOET01 | ✅ |
+
+**Nhà cung cấp và Phụ huynh** là vai trò tham gia vào phân hệ, không phải phân hệ riêng:
+- NCC: tổ chức tập huấn (1), gửi học liệu thẩm định (2), xử lý bảo hành (3), báo cáo triển khai (0.1), quyền dữ liệu theo hợp tác (0.4).
+- PH: liên kết & xác minh (4), xem chuyên cần (6), xem kết quả đã công bố (7), trao đổi & thông báo (8), trả lời khảo sát (0.2).
+
+Phân hệ **luôn bật**: 0, 4, 8, 0.1, 0.4, 0.5. **Bật/tắt theo đơn vị**: 1, 2, 3, 5, 6, 7, 0.2, 0.3. Demo: Sở đặt **bắt buộc** cho 0, 6, 0.2, 0.1; TH Sao Mai tắt phân hệ 3.
+
+### V2.3 Quy trình 5 bước ↔ phân hệ
+
+| Bước | Ai chủ trì | Đầu ra | Phân hệ |
+|---|---|---|---|
+| 1. Định hướng từ Tỉnh/Sở | Sở | Đề án năm học, bộ chỉ số & chỉ tiêu, khung CT STEM, khảo sát hiện trạng, cấu hình bắt buộc | 0, 2, 0.2, 0.5, 8 |
+| 2. Lập kế hoạch | Trường (Sở duyệt) | Tiếp nhận chỉ tiêu; kế hoạch STEM; hồ sơ tổ chức dạy học; kế hoạch & lịch dạy; kế hoạch bồi dưỡng, thiết bị | 0, 4, 5, 1, 3, 8 |
+| 3. Đào tạo và triển khai | Trường · NCC | Bồi dưỡng GV; triển khai học liệu; chuẩn bị phòng/thiết bị; buổi dạy, điểm danh, minh chứng | 1, 2, 3, 5, 6 |
+| 4. Đánh giá vận hành | Trường · Tổ · Sở | Đánh giá năng lực HS; xếp loại GV; hiệu quả thiết bị; khảo sát hài lòng; giám sát | 7, 1, 3, 0.2, 0.1 |
+| 5. Tổng hợp báo cáo & đề xuất cải tiến | Trường → Sở | Báo cáo định kỳ; tổng hợp tỉnh; đề xuất cải tiến; điều chỉnh đề án năm sau | 0.1, 0.3, 0, 8 |
+
+Mỗi đơn vị có **tiến trình đề án** theo năm học (bước đang ở, đầu ra đã xong). Hiện là dữ liệu minh họa trên trang "Tiến trình đề án" và trang tổng quan; M3 sẽ tính tự động từ dữ liệu thật.
+
+### V2.4 Phân tích chênh lệch: bản đã build (v0.1) so với cấu trúc mới
+
+| # | Hạng mục | v0.1 | v0.2 | Xử lý |
+|---|---|---|---|---|
+| 1 | Cách nhóm | 9 module theo chức năng (core, plan, activity, resource, assess, training, provider, portal, report) | 14 phân hệ theo 5 tầng + 5 bước | ✅ Đã tái cấu trúc registry, quyền, menu, cấu hình |
+| 2 | **Khảo sát (0.2)** | Không có | Phân hệ riêng, dùng ở bước 1, 4, 5 | ➕ Bổ sung vào registry & menu (M4) |
+| 3 | **Buổi dạy & điểm danh (6)** | Gộp mờ trong "Hoạt động & minh chứng" | Phân hệ riêng: check-in, điểm danh, nhật ký, offline | ➕ Tách riêng (M7) |
+| 4 | **Vật tư, tồn kho (3)** | Chỉ phòng & thiết bị | Thêm vật tư nhập–xuất–tồn, bảo trì | ➕ Thêm quyền `resource.stock.manage`, menu "Vật tư & tồn kho" |
+| 5 | **Kế hoạch & lịch dạy (5)** | Nằm trong plan/resource | Phân hệ riêng nhận đầu vào từ 2 và 3 | ➕ Tách riêng (M6) |
+| 6 | **Tích hợp dữ liệu & AI (0.3)** | Chỉ ghi chú Phase 4 | Phân hệ riêng + kho phân tích | ➕ Registry & menu (M9); từ điển + ánh xạ làm nền ngay |
+| 7 | Nhà cung cấp, Cổng HS/PH | Module riêng | Vai trò tham gia phân hệ | ✅ Phân bổ lại menu NCC/PH theo phân hệ |
+| 8 | Chuẩn dữ liệu ngành | Chưa có | QĐ 2768 bắt buộc dùng | ✅ Nạp 892 thuật ngữ, ánh xạ 22 cột, thêm cột chuẩn còn thiếu, COMMENT mã BG trên cột |
+| 9 | Offline / mobile | Chỉ responsive | Offline đồng bộ khi có mạng | ⏭ PWA + hàng đợi cho phân hệ 6 (M7), ADR-011 |
+| 10 | Tác vụ nền, object storage, kho phân tích | Chưa mô tả rõ | Có trong kiến trúc | ⏭ ADR-012; storage ở M3 (minh chứng), dw ở M9 |
+| 11 | Tiến trình đề án | Không có | Xương sống điều hành Sở ↔ Trường | ✅ Trang "Tiến trình đề án" + thanh 5 bước trên tổng quan (dữ liệu minh họa) |
+
+### V2.5 Chuẩn dữ liệu theo QĐ 2768/QĐ-BGDĐT
+
+- **Nạp nguyên văn** Phụ lục 01 (41 miền MOET01–41) và Phụ lục 02 (892 thuật ngữ BG_00001–00892) vào `cfg.data_domain`, `cfg.data_term`. Nguồn: `src/domain/dictionary/qd2768.json`, trích tự động từ PDF và đã có test toàn vẹn.
+- **Quy ước:** cột nội bộ dùng `snake_case`, ổn định cho code. **Trao đổi dữ liệu** (import/export Excel, API, báo cáo gửi Sở/Bộ) dùng **tên kỹ thuật chuẩn** (`truongId`, `tenCsgd`, `capHoc`, `maLop`, `tenLop`, `khoi`, `hoTenNh`, `ngaySinhNh`, `gioiTinh`…).
+- **Ánh xạ** cột ↔ thuật ngữ trong `src/domain/dictionary/mapping.ts`, sinh ra `cfg.data_term_mapping` và `COMMENT ON COLUMN`. Trạng thái `EXACT` (khớp) hoặc `PARTIAL` (cần quy đổi giá trị).
+- **Cột chuẩn đã bổ sung:** `org.unit.ma_dinh_danh` (truongId ≤15 / maDinhDanhToChuc ≤35), `loai_hinh_csgd`, `tinh_thanh`; `org.class.ma_lop`; `iam.person_private.so_dinh_danh_ca_nhan` (12 số, CDE-CN-001), `dan_toc` (CDE-CN-004), `quoc_tich` (CDE-CN-003).
+- **Quy đổi giá trị đã xác định:** giới tính theo ISO/IEC 5218 (NAM→1, NU→2), đúng định nghĩa của BG_00010.
+- **Giới hạn của văn bản:** QĐ 2768 **không** ban hành danh sách giá trị cho các thuộc tính kiểu Enumeration (cấp học, loại hình CSGD, khối, môn học, trạng thái người học, chức vụ, dân tộc…), và **không có thuật ngữ riêng cho STEM**. Hệ thống tạm dùng giá trị nội bộ và đánh dấu "cần quy đổi". Dữ liệu đặc thù STEM (buổi dạy STEM, rubric STEM, khảo sát) là phần mở rộng, gắn vào miền gần nhất (MOET11, 31, 32, 39).
+- **Giao diện:** tiêu đề cột dùng component `<Term code="BG_…">`; rê chuột sẽ thấy mã và tên kỹ thuật chuẩn. Trang "Từ điển dữ liệu ngành" (0.5) cho phép tra cứu, lọc theo miền và xem cột nào đang dùng thuật ngữ nào.
+
+### V2.6 Roadmap mới (theo trình tự 5 bước)
+
+| Mốc | Phân hệ | Bước | Tiêu chí nghiệm thu chính |
+|---|---|---|---|
+| M0–M1 ✅ | 0.4, 0.5, 4 (đọc) + tái cấu trúc v0.2 | – | RLS 7 vai trò; 14 phân hệ trong registry/menu; từ điển 892 thuật ngữ; test đồng bộ |
+| M1b | Adapter Supabase | – | Đăng nhập thật, đổi ngữ cảnh qua JWT, đọc qua RLS trên Supabase project mới |
+| M2 | **4** Tổ chức dạy học đầy đủ | 2 | Import/export Excel **theo tên kỹ thuật QĐ 2768**; báo lỗi theo dòng; liên kết PH (W8); hồ sơ NCC |
+| M3 | **0** Định hướng & kế hoạch + **8** Quy trình & thông báo | 1, 2 | Sở ban hành → giao chỉ tiêu → trường lập kế hoạch → Sở duyệt/trả lại; tiến trình 5 bước tính tự động; minh chứng lưu object storage |
+| M4 | **0.2** Khảo sát | 1, 4 | Sở phát hành phiếu hiện trạng (bắt buộc), trường thêm câu; tỷ lệ phản hồi; tổng hợp theo trường; ẩn danh đúng cấu hình |
+| M5 | **2** Chương trình & học liệu + **1** Đào tạo GV | 2, 3 | Thẩm định → công bố học liệu NCC; khóa bồi dưỡng, chứng chỉ, xếp loại năng lực GV |
+| M6 | **3** Thiết bị, vật tư & phòng + **5** Kế hoạch & lịch dạy | 2, 3 | Tồn kho đúng sau nhập/xuất; lịch dạy phát hiện xung đột phòng/GV/thiết bị |
+| M7 | **6** Buổi dạy & điểm danh (PWA offline) + **7** Đánh giá | 3, 4 | Điểm danh ngoại tuyến đồng bộ không mất dữ liệu; rubric năng lực theo thuật ngữ MOET11; PH chỉ thấy kết quả đã công bố |
+| M8 | **0.1** Dashboard & báo cáo nâng cao | 4, 5 | Kỳ báo cáo điền sẵn, khóa snapshot; đề xuất cải tiến; số liệu Sở = tổng từ trường |
+| M9 | **0.3** Tích hợp dữ liệu & AI + kho phân tích | 5 | Đồng bộ ít nhất một nguồn ngoài; dw cho Power BI; trợ lý AI chỉ trả lời trong phạm vi quyền |
+
+> Nếu **Khảo sát** là ưu tiên số 1 (tên repo là "hệ thống khảo sát STEM"), có thể đưa M4 lên ngay sau M2.
+
+---
+
 
 ## 0. Hiện trạng
 
@@ -79,7 +185,7 @@ Chỉ dùng để hiểu bài toán. **Không sao chép giao diện, thương hi
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 1.3 Danh sách module
+### 1.3 Danh sách module *(v0.1 — đã thay bằng V2.2)*
 
 | # | Module (schema) | Trách nhiệm | Phụ thuộc | Phase |
 |---|---|---|---|---|
@@ -126,7 +232,7 @@ stem-platform/
 
 ---
 
-## 2. Cấu trúc menu theo vai trò
+## 2. Cấu trúc menu theo vai trò *(v0.1 — menu hiện hành nhóm theo phân hệ: `src/domain/navigation.ts`)*
 
 Menu được **sinh động** theo công thức: `module registry` ∩ `module được bật ở đơn vị của ngữ cảnh hiện tại` ∩ `quyền của vai trò`. Nhãn dùng thuật ngữ cấu hình được, ví dụ "Tổ chuyên môn" có thể đổi thành "Khoa". Mỗi trang tổng quan đều có khối **"Việc cần làm"** và đường drill-down.
 
@@ -334,7 +440,7 @@ Mọi thay đổi tạo **phiên bản mới**, ghi người sửa, ngày hiệu
 
 ---
 
-## 7. Roadmap MVP
+## 7. Roadmap MVP *(v0.1 — đã thay bằng V2.6)*
 
 Ước lượng giả định 1 dev full-stack + Claude, làm theo lát cắt dọc. Mỗi milestone kết thúc với **build + lint + test xanh**, có seed demo và docs cập nhật.
 

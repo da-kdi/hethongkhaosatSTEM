@@ -29,7 +29,7 @@ Người dùng (cfg.setting.manage, đơn vị trong phạm vi) ─► cfg.set_s
 |---|---|---|---|
 | W1 | Chỉ tiêu Sở → Trường | Soạn bộ chỉ số → Ban hành → Giao chỉ tiêu → Trường tiếp nhận / kiến nghị → theo dõi tự động từ metric | Chỉ số, công thức, hạn: Sở (MANDATORY) |
 | W2 | Kế hoạch STEM | Nháp → (Tổ rà soát) → BGH duyệt / trả lại → Hiệu lực → điều chỉnh tạo phiên bản mới | Bật/tắt bước Tổ; số cấp duyệt |
-| W3 | Hoạt động & minh chứng | GV ghi nhận → nộp minh chứng → Tổ duyệt / yêu cầu bổ sung → tính vào báo cáo | `wf.activity.dept_review` (đã có ở cấu hình); loại minh chứng bắt buộc |
+| W3 | Hoạt động & minh chứng | GV ghi nhận → nộp minh chứng → Tổ duyệt / yêu cầu bổ sung → tính vào báo cáo | `wf.session.dept_review` (đã có ở cấu hình); loại minh chứng bắt buộc |
 | W4 | Đặt phòng/thiết bị | Đăng ký → phát hiện xung đột → chọn ưu tiên, các đơn còn lại tự từ chối kèm gợi ý → xác nhận → check-in | Quy tắc ưu tiên |
 | W5 | Báo cáo định kỳ | Sở mở kỳ → điền sẵn từ metric → trường bổ sung/giải trình → BGH ký nộp → Sở chấp nhận / yêu cầu giải trình → khóa snapshot | Mẫu báo cáo: Sở |
 | W6 | Nhiệm vụ & giải trình | Giao (đối tượng, hạn) → phản hồi + minh chứng → đóng / mở lại | SLA nhắc hạn |
@@ -42,5 +42,5 @@ Sơ đồ trạng thái mẫu (W2/W3):
 ```
 NHÁP ──gửi──► CHỜ_TỔ_DUYỆT ──duyệt──► CHỜ_BGH_DUYỆT ──duyệt──► ĐÃ_DUYỆT ──điều chỉnh──► (phiên bản mới: NHÁP)
   ▲               │ trả lại                 │ trả lại
-  └───────────────┴─────────────────────────┘     (CHỜ_TỔ_DUYỆT bị bỏ qua khi wf.activity.dept_review = false)
+  └───────────────┴─────────────────────────┘     (CHỜ_TỔ_DUYỆT bị bỏ qua khi wf.session.dept_review = false)
 ```

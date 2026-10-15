@@ -97,7 +97,13 @@ describe("Menu động", () => {
     expect(slugs(A.soLeader, R.soLeader)).toContain("truong-hoc");
     expect(slugs(A.bmHuong, R.bmHuong)).toContain("lop-cua-toi");
     expect(slugs(A.bmHuong, R.bmHuong)).not.toContain("tai-khoan");
-    expect(slugs(A.phThu, R.phThu)).toEqual(["tong-quan", "trao-doi", "dang-ky"]);
+    expect(slugs(A.phThu, R.phThu)).toEqual(["tong-quan", "dang-ky", "chuyen-can", "ket-qua", "trao-doi", "khao-sat"]);
+    expect(slugs(A.soSpecialist, R.soSpecialist)).toEqual(expect.arrayContaining(["tien-trinh", "giao-chi-tieu", "khao-sat", "tu-dien", "ban-do-phan-he"]));
+    expect(slugs(A.kdiAdmin, R.kdiAdmin)).not.toContain("tu-dien");
+  });
+  it("menu nhóm theo phân hệ, đúng thứ tự 0 → 8 → 0.1 → 0.3 → Quản trị", () => {
+    const labels = buildMenu(ds, ctx(A.soSpecialist, R.soSpecialist)).map((g) => g.label.split(" · ")[0]);
+    expect(labels).toEqual(["Tổng quan", "0", "1", "2", "3", "4", "6", "7", "8", "0.1", "0.2", "0.3", "Quản trị hệ thống (0.4"]);
   });
   it("tắt module Phòng & thiết bị ở TH Sao Mai → ẩn menu ở Sao Mai, không ảnh hưởng Bình Minh", () => {
     expect(slugs(A.smPrincipal, R.smPrincipal)).not.toContain("phong-thiet-bi");

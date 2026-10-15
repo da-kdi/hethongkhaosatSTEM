@@ -3,7 +3,8 @@ import { Lock } from "lucide-react";
 import { useStore } from "@/app/store";
 import type { AccessContext } from "@/domain/access";
 import { isNavItemAllowed } from "@/domain/menu";
-import { findNavItem, MODULES } from "@/domain/navigation";
+import { findNavItem, READY } from "@/domain/navigation";
+import { MODULES, STEP_BY_NO } from "@/domain/modules";
 import type { Portal } from "@/domain/roles";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/layout/page";
@@ -16,6 +17,9 @@ import { RolesPage } from "./iam/RolesPage";
 import { ConfigPage } from "./cfg/ConfigPage";
 import { AuditPage } from "./audit/AuditPage";
 import { GrantsPage } from "./provider/GrantsPage";
+import { DeAnProgressPage } from "./plan/DeAnProgress";
+import { ModuleMapPage } from "./cfg/ModuleMapPage";
+import { DictionaryPage } from "./cfg/DictionaryPage";
 
 /** Trang đã triển khai (M0). Mục khác trong menu hiển thị trang "đang phát triển" kèm phạm vi & milestone. */
 const PAGES: Record<string, (p: { access: AccessContext }) => React.ReactNode> = {
@@ -30,6 +34,9 @@ const PAGES: Record<string, (p: { access: AccessContext }) => React.ReactNode> =
   "cau-hinh": ConfigPage,
   "nhat-ky": AuditPage,
   "truong-duoc-cap-quyen": GrantsPage,
+  "tien-trinh": DeAnProgressPage,
+  "ban-do-phan-he": ModuleMapPage,
+  "tu-dien": DictionaryPage,
 };
 
 export function PageView({ portal, slug, access }: { portal: Portal; slug: string; access: AccessContext }) {
@@ -53,17 +60,34 @@ export function PageView({ portal, slug, access }: { portal: Portal; slug: strin
   }
 
   const Page = PAGES[slug];
-  if (Page && item.milestone === "M0") return <Page access={access} />;
+  if (Page && item.milestone === READY) return <Page access={access} />;
 
+  const mod = MODULES[item.module];
   return (
     <div>
-      <PageHeader title={item.label} description={MODULES[item.module].name} actions={<Badge variant="warning">Triển khai ở {item.milestone}</Badge>} />
-      <div className="rounded-xl border border-dashed bg-card p-6">
-        <h2 className="text-sm font-semibold">Phạm vi dự kiến</h2>
-        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{item.scope ?? MODULES[item.module].description}</p>
-        <p className="mt-4 text-xs text-muted-foreground">
-          Mục này đã có trong menu và đã được kiểm quyền và kiểm module bật/tắt. Màn hình nghiệp vụ sẽ triển khai theo lộ trình trong
-          <code className="mx-1 rounded bg-muted px-1">docs/ARCHITECTURE_PLAN.md</code>§7.
+      <PageHeader
+        title={item.label}
+        description={`Phân hệ ${mod.no} · ${mod.name}`}
+        actions={<Badge variant="warning">Triển khai ở {item.milestone}</Badge>}
+      />
+      <div className="grid gap-4 rounded-xl border border-dashed bg-card p-6 lg:grid-cols-2">
+        <div>
+          <h2 className="text-sm font-semibold">Phạm vi màn hình</h2>
+          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{item.scope ?? mod.description}</p>
+          <h2 className="mt-4 text-sm font-semibold">Tham gia quy trình đề án</h2>
+          <ul className="mt-1 flex flex-wrap gap-1.5">
+            {mod.steps.map((n) => <li key={n}><Badge variant="outline">Bước {n} · {STEP_BY_NO[n].name}</Badge></li>)}
+          </ul>
+        </div>
+        <div>
+          <h2 className="text-sm font-semibold">Chi tiết phân hệ</h2>
+          <ul className="mt-1 list-disc pl-4 text-sm text-muted-foreground">{mod.features.map((f) => <li key={f}>{f}</li>)}</ul>
+          {mod.dataDomains.length > 0 && (
+            <p className="mt-3 text-xs text-muted-foreground">Miền dữ liệu QĐ 2768: <span className="font-mono">{mod.dataDomains.join(", ")}</span></p>
+          )}
+        </div>
+        <p className="text-xs text-muted-foreground lg:col-span-2">
+          Mục này đã có trong menu, đã kiểm quyền và kiểm phân hệ bật/tắt. Lộ trình chi tiết: <code className="rounded bg-muted px-1">docs/ARCHITECTURE_PLAN.md</code> §7.
         </p>
       </div>
     </div>

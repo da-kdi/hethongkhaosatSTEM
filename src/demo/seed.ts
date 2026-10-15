@@ -21,7 +21,7 @@
  */
 import { did } from "../domain/ids.ts";
 import type {
-  Account, ClassRoom, ConfigSetting, Dataset, Enrollment, GuardianLink, OrgUnit, Person,
+  Account, ClassRoom, ConfigSetting, Dataset, DeAnProgress, Enrollment, GuardianLink, OrgUnit, Person,
   ProviderGrant, RoleAssignment, StaffMembership, TeachingAssignment, TodoItem,
 } from "../domain/model.ts";
 
@@ -46,13 +46,13 @@ export const U = {
 const units: OrgUnit[] = [
   { id: U.platform, parentId: null, type: "PLATFORM", code: "ROOT", name: "Nền tảng Quản trị STEM", status: "ACTIVE" },
   { id: U.so, parentId: U.platform, type: "SO", code: "SO-AH", name: "Sở GD&ĐT tỉnh An Hòa", status: "ACTIVE" },
-  { id: U.bm, parentId: U.so, type: "TRUONG", code: "THCS-BM", name: "Trường THCS Bình Minh", ward: "Phường Đông Thành", schoolLevel: "THCS", status: "ACTIVE" },
+  { id: U.bm, parentId: U.so, type: "TRUONG", code: "THCS-BM", name: "Trường THCS Bình Minh", ward: "Phường Đông Thành", schoolLevel: "THCS", maDinhDanh: "AH00010201", loaiHinhCsgd: "Công lập", tinhThanh: "Tỉnh An Hòa (giả định)", status: "ACTIVE" },
   { id: U.bmKhtn, parentId: U.bm, type: "TO", code: "BM-KHTN", name: "Tổ Khoa học tự nhiên", status: "ACTIVE" },
   { id: U.bmToan, parentId: U.bm, type: "TO", code: "BM-TT", name: "Tổ Toán – Tin", status: "ACTIVE" },
-  { id: U.ts, parentId: U.so, type: "TRUONG", code: "THPT-TS", name: "Trường THPT Thanh Sơn", ward: "Xã Phú Lộc", schoolLevel: "THPT", status: "ACTIVE" },
+  { id: U.ts, parentId: U.so, type: "TRUONG", code: "THPT-TS", name: "Trường THPT Thanh Sơn", ward: "Xã Phú Lộc", schoolLevel: "THPT", maDinhDanh: "AH00020301", loaiHinhCsgd: "Công lập", tinhThanh: "Tỉnh An Hòa (giả định)", status: "ACTIVE" },
   { id: U.tsLy, parentId: U.ts, type: "TO", code: "TS-LCN", name: "Tổ Vật lý – Công nghệ", status: "ACTIVE" },
   { id: U.tsToan, parentId: U.ts, type: "TO", code: "TS-TT", name: "Tổ Toán – Tin", status: "ACTIVE" },
-  { id: U.sm, parentId: U.so, type: "TRUONG", code: "TH-SM", name: "Trường Tiểu học Sao Mai", ward: "Phường Tây An", schoolLevel: "TH", status: "ACTIVE" },
+  { id: U.sm, parentId: U.so, type: "TRUONG", code: "TH-SM", name: "Trường Tiểu học Sao Mai", ward: "Phường Tây An", schoolLevel: "TH", maDinhDanh: "AH00030101", loaiHinhCsgd: "Công lập", tinhThanh: "Tỉnh An Hòa (giả định)", status: "ACTIVE" },
   { id: U.smK45, parentId: U.sm, type: "TO", code: "SM-K45", name: "Tổ khối 4–5", status: "ACTIVE" },
   { id: U.kdi, parentId: U.platform, type: "NCC", code: "NCC-KDI", name: "KDI Education (demo)", status: "ACTIVE" },
   { id: U.rbv, parentId: U.platform, type: "NCC", code: "NCC-RBV", name: "Công ty Robotic Việt (demo)", status: "ACTIVE" },
@@ -101,14 +101,14 @@ export const C = {
   sm4: did("cls", 7), sm5: did("cls", 8),
 };
 const classes: ClassRoom[] = [
-  { id: C.bm6, schoolId: U.bm, departmentId: U.bmKhtn, academicYearId: YEAR, name: "6A1", grade: 6, homeroomPersonId: P.bmHuong },
-  { id: C.bm7, schoolId: U.bm, departmentId: U.bmToan, academicYearId: YEAR, name: "7A1", grade: 7, homeroomPersonId: P.bmAnh },
-  { id: C.bm8, schoolId: U.bm, departmentId: U.bmKhtn, academicYearId: YEAR, name: "8A1", grade: 8, homeroomPersonId: P.bmLan },
-  { id: C.bm9, schoolId: U.bm, departmentId: U.bmToan, academicYearId: YEAR, name: "9A1", grade: 9 },
-  { id: C.ts10, schoolId: U.ts, departmentId: U.tsLy, academicYearId: YEAR, name: "10A1", grade: 10, homeroomPersonId: P.tsNgoc },
-  { id: C.ts11, schoolId: U.ts, departmentId: U.tsToan, academicYearId: YEAR, name: "11A1", grade: 11 },
-  { id: C.sm4, schoolId: U.sm, departmentId: U.smK45, academicYearId: YEAR, name: "4A", grade: 4 },
-  { id: C.sm5, schoolId: U.sm, departmentId: U.smK45, academicYearId: YEAR, name: "5A", grade: 5 },
+  { id: C.bm6, schoolId: U.bm, departmentId: U.bmKhtn, academicYearId: YEAR, maLop: "BM-2627-6A1", name: "6A1", grade: 6, homeroomPersonId: P.bmHuong },
+  { id: C.bm7, schoolId: U.bm, departmentId: U.bmToan, academicYearId: YEAR, maLop: "BM-2627-7A1", name: "7A1", grade: 7, homeroomPersonId: P.bmAnh },
+  { id: C.bm8, schoolId: U.bm, departmentId: U.bmKhtn, academicYearId: YEAR, maLop: "BM-2627-8A1", name: "8A1", grade: 8, homeroomPersonId: P.bmLan },
+  { id: C.bm9, schoolId: U.bm, departmentId: U.bmToan, academicYearId: YEAR, maLop: "BM-2627-9A1", name: "9A1", grade: 9 },
+  { id: C.ts10, schoolId: U.ts, departmentId: U.tsLy, academicYearId: YEAR, maLop: "TS-2627-10A1", name: "10A1", grade: 10, homeroomPersonId: P.tsNgoc },
+  { id: C.ts11, schoolId: U.ts, departmentId: U.tsToan, academicYearId: YEAR, maLop: "TS-2627-11A1", name: "11A1", grade: 11 },
+  { id: C.sm4, schoolId: U.sm, departmentId: U.smK45, academicYearId: YEAR, maLop: "SM-2627-4A", name: "4A", grade: 4 },
+  { id: C.sm5, schoolId: U.sm, departmentId: U.smK45, academicYearId: YEAR, maLop: "SM-2627-5A", name: "5A", grade: 5 },
 ];
 
 // ---------- Học sinh (tên ghép ngẫu nhiên có quy tắc, hư cấu) ----------
@@ -243,42 +243,79 @@ function setting(unitId: string, key: string, value: unknown, mode: ConfigSettin
   return { id: did("setting", cn), unitId, key, value, mode, version: 1, updatedAt: "2026-09-01T08:00:00+07:00" };
 }
 const settings: ConfigSetting[] = [
-  // Mặc định nền tảng: mọi module bật, cấp dưới tự chủ
-  setting(U.platform, "module.plan", { enabled: true }, "AUTONOMOUS"),
-  setting(U.platform, "module.activity", { enabled: true }, "AUTONOMOUS"),
-  setting(U.platform, "module.resource", { enabled: true }, "AUTONOMOUS"),
-  setting(U.platform, "module.assess", { enabled: true }, "AUTONOMOUS"),
-  setting(U.platform, "module.training", { enabled: true }, "AUTONOMOUS"),
-  setting(U.platform, "module.provider", { enabled: true }, "AUTONOMOUS"),
-  setting(U.platform, "module.portal", { enabled: true }, "AUTONOMOUS"),
-  setting(U.platform, "module.report", { enabled: true }, "AUTONOMOUS"),
-  // Sở bắt buộc: kế hoạch, hoạt động, báo cáo phải bật ở mọi trường
+  // Mặc định nền tảng: mọi phân hệ bật được bật/tắt đều bật, cấp dưới tự chủ
+  ...(["training", "program", "resource", "schedule", "session", "assess", "survey", "integration"] as const).map((m) =>
+    setting(U.platform, `module.${m}`, { enabled: true }, "AUTONOMOUS")),
+  // Sở bắt buộc: định hướng & kế hoạch, buổi dạy & điểm danh, khảo sát, báo cáo phải bật ở mọi trường
   setting(U.so, "module.plan", { enabled: true }, "MANDATORY"),
-  setting(U.so, "module.activity", { enabled: true }, "MANDATORY"),
+  setting(U.so, "module.session", { enabled: true }, "MANDATORY"),
+  setting(U.so, "module.survey", { enabled: true }, "MANDATORY"),
   setting(U.so, "module.report", { enabled: true }, "MANDATORY"),
-  // Danh mục loại hoạt động: Sở ban hành, trường được thêm (EXTEND)
+  // Danh mục loại hoạt động STEM: Sở ban hành, trường được thêm (EXTEND)
   setting(U.so, "catalog.activity_types", ["Bài học STEM", "Hoạt động trải nghiệm STEM", "Nghiên cứu khoa học kỹ thuật"], "EXTEND"),
   setting(U.bm, "catalog.activity_types", ["CLB Robotics"], "EXTEND"),
-  // Quy trình duyệt hoạt động: Sở cho phép trường tự quyết có bước Tổ duyệt hay không
-  setting(U.so, "wf.activity.dept_review", { enabled: true }, "AUTONOMOUS"),
-  setting(U.ts, "wf.activity.dept_review", { enabled: false }, "AUTONOMOUS"),
-  // Tiểu học Sao Mai chưa có phòng STEM → tắt module Phòng & thiết bị
+  // Quy trình duyệt buổi dạy & minh chứng: Sở cho phép trường tự quyết có bước Tổ rà soát hay không
+  setting(U.so, "wf.session.dept_review", { enabled: true }, "AUTONOMOUS"),
+  setting(U.ts, "wf.session.dept_review", { enabled: false }, "AUTONOMOUS"),
+  // Tiểu học Sao Mai chưa có phòng STEM → tắt phân hệ Thiết bị, vật tư & phòng
   setting(U.sm, "module.resource", { enabled: false }, "AUTONOMOUS"),
 ];
 
 const todos: TodoItem[] = [
   { id: "t1", unitId: U.so, portal: "so", title: "2 trường chưa nộp báo cáo tháng 9", detail: "THPT Thanh Sơn, TH Sao Mai — hạn 10/10/2026", due: "2026-10-10", severity: "danger" },
-  { id: "t2", unitId: U.so, portal: "so", title: "1 học liệu chờ thẩm định", detail: "KDI Education gửi 'Robotics cơ bản khối 6 — v2'", severity: "warning" },
+  { id: "t2", unitId: U.so, portal: "so", title: "1 học liệu chờ thẩm định (phân hệ 2)", detail: "KDI Education gửi 'Robotics cơ bản khối 6 — v2'", severity: "warning" },
   { id: "t3", unitId: U.bm, portal: "truong", title: "1 liên kết phụ huynh chờ xác minh", detail: "Mai Văn Tùng → học sinh lớp 6A1", severity: "warning" },
   { id: "t4", unitId: U.bm, portal: "truong", title: "Kế hoạch STEM HK1 chờ BGH duyệt", detail: "Tổ KHTN gửi 12/10/2026", due: "2026-10-20", severity: "info" },
-  { id: "t5", unitId: U.bmKhtn, portal: "to", title: "3 minh chứng hoạt động chờ tổ duyệt", detail: "Lớp 6A1, 8A1", severity: "warning" },
-  { id: "t6", unitId: U.bm, portal: "gv", title: "Nộp minh chứng hoạt động 'Mạch điện đơn giản'", detail: "Lớp 6A1 — hạn 18/10", due: "2026-10-18", severity: "info" },
+  { id: "t5", unitId: U.bmKhtn, portal: "to", title: "3 minh chứng buổi dạy chờ tổ rà soát", detail: "Lớp 6A1, 8A1 — phân hệ 6", severity: "warning" },
+  { id: "t6", unitId: U.bm, portal: "gv", title: "Nộp nhật ký & minh chứng buổi dạy 'Mạch điện đơn giản'", detail: "Lớp 6A1 — hạn 18/10", due: "2026-10-18", severity: "info" },
   { id: "t7", unitId: U.kdi, portal: "ncc", title: "Quyền dữ liệu tại THPT Thanh Sơn đã hết hạn", detail: "Hết hạn 30/06/2026 — đề nghị trường gia hạn", severity: "danger" },
+];
+
+// ---------- Tiến trình 5 bước triển khai đề án (dữ liệu MINH HỌA — tự động hóa ở M3) ----------
+type Item = { label: string; module: string; done: boolean };
+const it = (label: string, module: string, done: boolean): Item => ({ label, module, done });
+const deAn: DeAnProgress[] = [
+  {
+    unitId: U.so, academicYearId: YEAR, steps: [
+      { no: 1, status: "DONE", items: [it("Ban hành kế hoạch STEM năm học 2026-2027", "plan", true), it("Bộ chỉ số & giao chỉ tiêu cho 3 trường", "plan", true), it("Khảo sát hiện trạng cơ sở giáo dục", "survey", true), it("Khung chương trình STEM cấp tỉnh", "program", true)] },
+      { no: 2, status: "IN_PROGRESS", items: [it("Duyệt kế hoạch STEM của trường (2/3)", "plan", false), it("Phê duyệt kế hoạch bồi dưỡng GV toàn tỉnh", "training", true)] },
+      { no: 3, status: "IN_PROGRESS", items: [it("Tập huấn đợt 1 cho GV cốt cán", "training", true), it("Thẩm định học liệu nhà cung cấp", "program", false)] },
+      { no: 4, status: "NOT_STARTED", items: [it("Giám sát buổi dạy & điểm danh", "session", false), it("Khảo sát mức độ hài lòng giữa kỳ", "survey", false)] },
+      { no: 5, status: "NOT_STARTED", items: [it("Tổng hợp báo cáo học kỳ I", "report", false), it("Đề xuất cải tiến", "report", false)] },
+    ],
+  },
+  {
+    unitId: U.bm, academicYearId: YEAR, steps: [
+      { no: 1, status: "DONE", items: [it("Tiếp nhận định hướng & chỉ tiêu của Sở", "plan", true), it("Trả lời khảo sát hiện trạng", "survey", true)] },
+      { no: 2, status: "DONE", items: [it("Kế hoạch STEM năm học được Sở duyệt", "plan", true), it("Hồ sơ lớp, GV, HS, PH", "org", true), it("Kế hoạch & lịch dạy STEM HK I", "schedule", true), it("Kế hoạch thiết bị & vật tư", "resource", true)] },
+      { no: 3, status: "IN_PROGRESS", items: [it("3/4 GV hoàn thành tập huấn đợt 1", "training", false), it("Phòng STEM sẵn sàng", "resource", true), it("Buổi dạy & điểm danh tuần 6", "session", false)] },
+      { no: 4, status: "NOT_STARTED", items: [it("Đánh giá năng lực & sản phẩm HS giữa kỳ", "assess", false), it("Khảo sát hài lòng HS & PH", "survey", false)] },
+      { no: 5, status: "NOT_STARTED", items: [it("Báo cáo định kỳ học kỳ I gửi Sở", "report", false)] },
+    ],
+  },
+  {
+    unitId: U.ts, academicYearId: YEAR, steps: [
+      { no: 1, status: "DONE", items: [it("Tiếp nhận định hướng & chỉ tiêu của Sở", "plan", true), it("Trả lời khảo sát hiện trạng", "survey", true)] },
+      { no: 2, status: "IN_PROGRESS", items: [it("Kế hoạch STEM năm học — Sở yêu cầu bổ sung", "plan", false), it("Hồ sơ lớp, GV, HS, PH", "org", true)] },
+      { no: 3, status: "NOT_STARTED", items: [it("Tập huấn GV", "training", false)] },
+      { no: 4, status: "NOT_STARTED", items: [] },
+      { no: 5, status: "NOT_STARTED", items: [] },
+    ],
+  },
+  {
+    unitId: U.sm, academicYearId: YEAR, steps: [
+      { no: 1, status: "DONE", items: [it("Tiếp nhận định hướng & chỉ tiêu của Sở", "plan", true)] },
+      { no: 2, status: "IN_PROGRESS", items: [it("Kế hoạch STEM năm học (chưa nộp)", "plan", false)] },
+      { no: 3, status: "NOT_STARTED", items: [] },
+      { no: 4, status: "NOT_STARTED", items: [] },
+      { no: 5, status: "NOT_STARTED", items: [] },
+    ],
+  },
 ];
 
 export function createDemoDataset(): Dataset {
   return structuredClone({
     units, years, classes, persons, accounts, assignments, staff, teaching, enrollments, guardianLinks,
-    grants, settings, labels: [{ unitId: U.ts, key: "unit.TO", label: "Tổ bộ môn" }], audit: [], todos,
+    grants, settings, labels: [{ unitId: U.ts, key: "unit.TO", label: "Tổ bộ môn" }], audit: [], todos, deAn,
   });
 }
