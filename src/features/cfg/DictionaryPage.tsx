@@ -63,7 +63,7 @@ export function DictionaryPage(_: { access: AccessContext }) {
           </div>
           <p className="rounded-lg border bg-muted px-3 py-2 text-xs text-muted-foreground">
             Lưu ý: văn bản chỉ định nghĩa thuật ngữ và kiểu dữ liệu, <strong>chưa ban hành danh sách giá trị</strong> cho các trường kiểu danh mục
-            (cấp học, loại hình, khối, môn học…). Hệ thống tạm dùng giá trị nội bộ và đánh dấu ánh xạ “cần quy đổi”.
+            (cấp học, loại hình, khối, môn học…). Danh mục giá trị sẽ lấy từ <strong>CSDL ngành của Bộ GD&amp;ĐT</strong> (M2); đến lúc đó hệ thống dùng giá trị nội bộ và đánh dấu “cần quy đổi”.
           </p>
 
           <Section
@@ -125,7 +125,7 @@ export function DictionaryPage(_: { access: AccessContext }) {
             )}
           </Section>
 
-          <Section title="Ánh xạ cột của hệ thống" description="Trạng thái “cần quy đổi”: cùng nghĩa nhưng giá trị nội bộ khác chuẩn (chờ danh mục chính thức).">
+          <Section title="Ánh xạ cột của hệ thống" description="Trạng thái “cần quy đổi”: cùng nghĩa nhưng giá trị nội bộ khác chuẩn (quy đổi theo danh mục CSDL ngành của Bộ).">
             <TableWrap>
               <thead>
                 <tr>

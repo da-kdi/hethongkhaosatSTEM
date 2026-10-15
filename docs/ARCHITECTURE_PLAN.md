@@ -1,6 +1,6 @@
 # Nền tảng Quản trị STEM đa cấp — Phân tích & Kế hoạch kiến trúc (v0.2)
 
-> Trạng thái: **ĐÃ DUYỆT (15/10/2026)**, triển khai trong repo này. Tiến độ: M0 ✅ · M1 ✅ · Tái cấu trúc v0.2 (14 phân hệ + QĐ 2768) ✅ trên nhánh `restructure/14-phan-he` · M1b ⏭ · M2 ⏭.
+> Trạng thái: **ĐÃ DUYỆT (15/10/2026)**, triển khai trong repo này. Tiến độ: M0 ✅ · M1 ✅ · Tái cấu trúc v0.2 (14 phân hệ + QĐ 2768) ✅ đã duyệt 16/10 · M1b ⏭ · M2 ⏭.
 > Các quyết định D1–D7 đang áp dụng mặc định như khuyến nghị, xem `docs/DECISIONS.md`.
 > Đầu vào: `STEM_PLATFORM_PRODUCT_BRIEF.md`, `PROMPT_FOR_CLAUDE.md`, video ghi màn hình hệ thống tham khảo (8 phút 43 giây), repo `da-kdi/stemtown-preview`.
 > Ngày: 15/10/2026 · cập nhật v0.2: 16/10/2026
@@ -30,7 +30,7 @@
 
 ### V2.2 Mười bốn phân hệ
 
-Hình phân hệ có 13 ô. Hình kiến trúc ghi "14 phân hệ". Thứ còn thiếu là **Bước 1–2 của đề án (Định hướng từ Sở, Lập kế hoạch)**, vốn có ở v0.1 dưới tên "Kế hoạch & chỉ tiêu". Vì vậy bổ sung **Phân hệ 0** làm phân hệ thứ 14 (**cần xác nhận**, ADR-009).
+Hình phân hệ có 13 ô. Hình kiến trúc ghi "14 phân hệ". Thứ còn thiếu là **Bước 1–2 của đề án (Định hướng từ Sở, Lập kế hoạch)**, vốn có ở v0.1 dưới tên "Kế hoạch & chỉ tiêu". Vì vậy bổ sung **Phân hệ 0** làm phân hệ thứ 14 (✅ **đã xác nhận 16/10/2026**, ADR-009).
 
 | Tầng | Số | Phân hệ | Chi tiết bên trong | Bước | Miền QĐ 2768 | Mốc |
 |---|---|---|---|---|---|---|
@@ -90,7 +90,7 @@ Mỗi đơn vị có **tiến trình đề án** theo năm học (bước đang 
 - **Ánh xạ** cột ↔ thuật ngữ trong `src/domain/dictionary/mapping.ts`, sinh ra `cfg.data_term_mapping` và `COMMENT ON COLUMN`. Trạng thái `EXACT` (khớp) hoặc `PARTIAL` (cần quy đổi giá trị).
 - **Cột chuẩn đã bổ sung:** `org.unit.ma_dinh_danh` (truongId ≤15 / maDinhDanhToChuc ≤35), `loai_hinh_csgd`, `tinh_thanh`; `org.class.ma_lop`; `iam.person_private.so_dinh_danh_ca_nhan` (12 số, CDE-CN-001), `dan_toc` (CDE-CN-004), `quoc_tich` (CDE-CN-003).
 - **Quy đổi giá trị đã xác định:** giới tính theo ISO/IEC 5218 (NAM→1, NU→2), đúng định nghĩa của BG_00010.
-- **Giới hạn của văn bản:** QĐ 2768 **không** ban hành danh sách giá trị cho các thuộc tính kiểu Enumeration (cấp học, loại hình CSGD, khối, môn học, trạng thái người học, chức vụ, dân tộc…), và **không có thuật ngữ riêng cho STEM**. Hệ thống tạm dùng giá trị nội bộ và đánh dấu "cần quy đổi". Dữ liệu đặc thù STEM (buổi dạy STEM, rubric STEM, khảo sát) là phần mở rộng, gắn vào miền gần nhất (MOET11, 31, 32, 39).
+- **Giới hạn của văn bản:** QĐ 2768 **không** ban hành danh sách giá trị cho các thuộc tính kiểu Enumeration (cấp học, loại hình CSGD, khối, môn học, trạng thái người học, chức vụ, dân tộc…), và **không có thuật ngữ riêng cho STEM**. Danh mục giá trị lấy từ **CSDL ngành của Bộ** (✅ quyết định 16/10, ADR-013) và nạp ở M2; trong lúc chờ, hệ thống dùng giá trị nội bộ và đánh dấu "cần quy đổi". Dữ liệu đặc thù STEM (buổi dạy STEM, rubric STEM, khảo sát) là phần mở rộng, gắn vào miền gần nhất (MOET11, 31, 32, 39).
 - **Giao diện:** tiêu đề cột dùng component `<Term code="BG_…">`; rê chuột sẽ thấy mã và tên kỹ thuật chuẩn. Trang "Từ điển dữ liệu ngành" (0.5) cho phép tra cứu, lọc theo miền và xem cột nào đang dùng thuật ngữ nào.
 
 ### V2.6 Roadmap mới (theo trình tự 5 bước)
@@ -99,7 +99,7 @@ Mỗi đơn vị có **tiến trình đề án** theo năm học (bước đang 
 |---|---|---|---|
 | M0–M1 ✅ | 0.4, 0.5, 4 (đọc) + tái cấu trúc v0.2 | – | RLS 7 vai trò; 14 phân hệ trong registry/menu; từ điển 892 thuật ngữ; test đồng bộ |
 | M1b | Adapter Supabase | – | Đăng nhập thật, đổi ngữ cảnh qua JWT, đọc qua RLS trên Supabase project mới |
-| M2 | **4** Tổ chức dạy học đầy đủ | 2 | Import/export Excel **theo tên kỹ thuật QĐ 2768**; báo lỗi theo dòng; liên kết PH (W8); hồ sơ NCC |
+| M2 | **4** Tổ chức dạy học đầy đủ + **danh mục CSDL ngành** | 2 | Nạp danh mục chuẩn từ CSDL ngành (cấp học, loại hình, khối, môn, trạng thái, chức vụ, dân tộc, đơn vị hành chính); quy đổi nội bộ → chuẩn; import/export Excel **theo tên kỹ thuật QĐ 2768**; báo lỗi theo dòng; liên kết PH (W8); hồ sơ NCC |
 | M3 | **0** Định hướng & kế hoạch + **8** Quy trình & thông báo | 1, 2 | Sở ban hành → giao chỉ tiêu → trường lập kế hoạch → Sở duyệt/trả lại; tiến trình 5 bước tính tự động; minh chứng lưu object storage |
 | M4 | **0.2** Khảo sát | 1, 4 | Sở phát hành phiếu hiện trạng (bắt buộc), trường thêm câu; tỷ lệ phản hồi; tổng hợp theo trường; ẩn danh đúng cấu hình |
 | M5 | **2** Chương trình & học liệu + **1** Đào tạo GV | 2, 3 | Thẩm định → công bố học liệu NCC; khóa bồi dưỡng, chứng chỉ, xếp loại năng lực GV |
@@ -108,7 +108,7 @@ Mỗi đơn vị có **tiến trình đề án** theo năm học (bước đang 
 | M8 | **0.1** Dashboard & báo cáo nâng cao | 4, 5 | Kỳ báo cáo điền sẵn, khóa snapshot; đề xuất cải tiến; số liệu Sở = tổng từ trường |
 | M9 | **0.3** Tích hợp dữ liệu & AI + kho phân tích | 5 | Đồng bộ ít nhất một nguồn ngoài; dw cho Power BI; trợ lý AI chỉ trả lời trong phạm vi quyền |
 
-> Nếu **Khảo sát** là ưu tiên số 1 (tên repo là "hệ thống khảo sát STEM"), có thể đưa M4 lên ngay sau M2.
+> ✅ Đã xác nhận 16/10/2026: giữ thứ tự theo 5 bước, Khảo sát ở M4.
 
 ---
 

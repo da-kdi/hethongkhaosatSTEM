@@ -14,7 +14,7 @@ export interface OrgUnit {
   schoolLevel?: SchoolLevel;
   /** BG_00419 truongId (trường, ≤15) / BG_00420 maDinhDanhToChuc */
   maDinhDanh?: string;
-  /** BG_00429 loaiHinhCsgd — chờ danh mục chuẩn */
+  /** BG_00429 loaiHinhCsgd — giá trị theo danh mục CSDL ngành của Bộ (M2) */
   loaiHinhCsgd?: string;
   /** BG_00426 tinhThanhCsgd */
   tinhThanh?: string;

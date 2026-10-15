@@ -65,7 +65,7 @@ Khóa cấu hình đang dùng: `module.<code>` → `{enabled}`; `catalog.activit
 | Cột | Thuật ngữ | Ràng buộc |
 |---|---|---|
 | `org.unit.ma_dinh_danh` | BG_00419 `truongId` / BG_00420 `maDinhDanhToChuc` | ≤35 ký tự; trường ≤15; duy nhất |
-| `org.unit.loai_hinh_csgd` | BG_00429 `loaiHinhCsgd` | chờ danh mục |
+| `org.unit.loai_hinh_csgd` | BG_00429 `loaiHinhCsgd` | danh mục CSDL ngành (M2) |
 | `org.unit.tinh_thanh` | BG_00426 `tinhThanhCsgd` | chuẩn là mã CDE-DC-001 |
 | `org.class.ma_lop` | BG_00504 `maLop` | ≤20 ký tự |
 | `iam.person_private.so_dinh_danh_ca_nhan` | BG_00011 `soDinhDanhCaNhan` (CDE-CN-001) | đúng 12 chữ số; dữ liệu nhạy cảm |
@@ -74,7 +74,7 @@ Khóa cấu hình đang dùng: `module.<code>` → `{enabled}`; `catalog.activit
 
 Mọi cột đã ánh xạ có `COMMENT ON COLUMN` ghi mã BG và tên kỹ thuật. Danh sách đầy đủ: `src/domain/dictionary/mapping.ts` hoặc trang "Từ điển dữ liệu ngành".
 
-**Quy ước trao đổi dữ liệu:** import/export, API tích hợp và báo cáo gửi Sở/Bộ dùng **tên kỹ thuật chuẩn** làm tên cột/khóa JSON. Giá trị đã có chuẩn mã thì quy đổi khi xuất, ví dụ `gioiTinh` theo ISO/IEC 5218: NAM→`1`, NU→`2`. QĐ 2768 chưa ban hành danh sách giá trị cho các thuộc tính kiểu danh mục, nên các cột này để trạng thái PARTIAL.
+**Quy ước trao đổi dữ liệu:** import/export, API tích hợp và báo cáo gửi Sở/Bộ dùng **tên kỹ thuật chuẩn** làm tên cột/khóa JSON. Giá trị đã có chuẩn mã thì quy đổi khi xuất, ví dụ `gioiTinh` theo ISO/IEC 5218: NAM→`1`, NU→`2`. QĐ 2768 chưa ban hành danh sách giá trị cho các thuộc tính kiểu danh mục. Giá trị lấy từ **CSDL ngành của Bộ** (ADR-013), nạp ở M2 vào `catalog.code_list/code_value`; đến lúc đó các cột này để trạng thái PARTIAL.
 
 ## Sơ đồ quan hệ (M1)
 

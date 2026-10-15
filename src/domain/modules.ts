@@ -6,7 +6,7 @@
  *  - Hình "Phân hệ theo tầng" (Sở ↔ Trường): Tầng 1–5, phân hệ 1–8 và 0.1–0.5.
  *  - Quy trình 5 bước triển khai đề án.
  * Phân hệ "0 · Định hướng & kế hoạch đề án" là phân hệ thứ 14, bổ sung để phủ Bước 1–2
- * (hình phân hệ chưa thể hiện), cần xác nhận (DECISIONS.md ADR-009).
+ * (hình phân hệ chưa thể hiện) — ĐÃ XÁC NHẬN 16/10/2026 (DECISIONS.md ADR-009).
  *
  * Mỗi phân hệ khai báo miền dữ liệu (MOETxx) và thuật ngữ chuẩn (BG_xxxxx) theo
  * QĐ 2768/QĐ-BGDĐT — test kiểm tra mọi mã đều có trong từ điển.

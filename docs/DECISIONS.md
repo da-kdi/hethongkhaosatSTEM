@@ -33,18 +33,27 @@
 ## ADR-009 · Cấu trúc 14 phân hệ × 5 tầng × 5 bước đề án (v0.2)
 - **Bối cảnh:** hình kiến trúc ghi 14 phân hệ; hình phân hệ có 13 ô (1–8, 0.1–0.5); quy trình đề án 5 bước.
 - **Quyết định:** registry `src/domain/modules.ts` là nguồn chân lý. Bổ sung **Phân hệ 0 · Định hướng & kế hoạch đề án** làm phân hệ thứ 14 để phủ Bước 1–2. Nhà cung cấp và Phụ huynh là vai trò tham gia, không phải phân hệ. Menu, quyền và cấu hình bật/tắt đều theo phân hệ.
-- **Trạng thái:** **chờ xác nhận** cách đánh số và việc thêm phân hệ 0.
+- **Trạng thái:** ✅ **Đã chấp nhận 16/10/2026.**
 
 ## ADR-010 · Áp dụng Từ điển dữ liệu dùng chung ngành GDĐT (QĐ 2768/QĐ-BGDĐT)
 - **Quyết định:** nạp nguyên văn 41 miền + 892 thuật ngữ vào DB. Cột nội bộ giữ `snake_case`; mọi trao đổi dữ liệu dùng **tên kỹ thuật chuẩn**. Ánh xạ trong `mapping.ts`, có test đảm bảo mã BG tồn tại. Bảng mới bắt buộc khai báo ánh xạ.
 - **Lý do:** không đổi tên cột hàng loạt (rủi ro, camelCase phải trích dẫn trong Postgres), nhưng vẫn đúng chuẩn ở mọi điểm giao tiếp.
-- **Giới hạn:** văn bản chưa có danh sách giá trị cho kiểu danh mục, nên các cột này dùng giá trị nội bộ + trạng thái PARTIAL.
+- **Giới hạn:** văn bản chưa có danh sách giá trị cho kiểu danh mục; giá trị lấy từ CSDL ngành của Bộ (ADR-013), trong lúc chờ dùng giá trị nội bộ + trạng thái PARTIAL.
 
 ## ADR-011 · Phân hệ 6 hoạt động ngoại tuyến (PWA)
 - Điểm danh và nhật ký buổi dạy ghi vào IndexedDB, mỗi bản ghi có id do client sinh (UUID). Đồng bộ qua RPC idempotent khi có mạng; xung đột giải theo "bản ghi của giáo viên phụ trách thắng" và ghi nhật ký. Triển khai ở M7.
 
 ## ADR-012 · Kho phân tích & tác vụ nền
 - Kho phân tích: schema `dw` (star schema), nạp theo lịch từ các schema nghiệp vụ, **chỉ chứa số liệu tổng hợp hoặc mã hóa**, phục vụ Power BI và dashboard Sở. Tác vụ nền: `pg_cron` + Edge Functions (thông báo, sinh báo cáo, đồng bộ). Triển khai M8–M9.
+
+## ADR-013 · Danh mục giá trị chuẩn lấy từ CSDL ngành của Bộ GD&ĐT
+- **Bối cảnh:** QĐ 2768 định nghĩa thuật ngữ nhưng không ban hành danh sách giá trị cho kiểu Enumeration (cấp học, loại hình CSGD, khối, môn học, trạng thái người học, chức vụ, dân tộc, tỉnh/xã…).
+- **Quyết định (16/10/2026):** nguồn danh mục duy nhất là **CSDL ngành của Bộ**. Thiết kế (M2):
+  - `catalog.code_list` (mã danh mục, thuật ngữ BG gắn kèm, nguồn `CSDL_NGANH`, phiên bản, thời điểm đồng bộ) và `catalog.code_value` (mã, tên, hiệu lực từ/đến, ngừng dùng).
+  - `catalog.value_map`: quy đổi giá trị nội bộ ↔ mã chuẩn, từng cột. Khi đủ quy đổi, trạng thái ánh xạ chuyển PARTIAL → EXACT.
+  - Nạp danh mục bằng file xuất từ CSDL ngành (M2). Đồng bộ tự động qua phân hệ 0.3 khi có quyền kết nối (M9).
+  - Danh mục chỉ đọc với trường/Sở; chỉ QTV nền tảng nạp phiên bản mới; mọi lần nạp đều ghi nhật ký.
+- **Cần chuẩn bị:** file danh mục xuất từ CSDL ngành, hoặc thông tin kết nối/tài khoản do Sở cung cấp.
 
 ---
 
@@ -63,9 +72,9 @@
 | — | Dữ liệu demo | Hư cấu: tỉnh "An Hòa", 3 trường, 2 NCC |
 
 ## Câu hỏi mở
-- **(v0.2)** Đồng ý thêm "Phân hệ 0 · Định hướng & kế hoạch đề án" làm phân hệ thứ 14 không? Hay phân hệ thứ 14 trong hình kiến trúc là phân hệ khác?
-- **(v0.2)** Thứ tự ưu tiên: có đưa **Khảo sát (0.2)** lên ngay sau M2 không (tên repo là "hệ thống khảo sát STEM")?
-- **(v0.2)** Danh mục giá trị chuẩn cho cấp học, loại hình CSGD, khối, môn học, trạng thái người học, chức vụ, dân tộc: lấy từ CSDL ngành của Bộ hay văn bản nào?
+- ✅ **(v0.2, đã trả lời 16/10)** Thêm "Phân hệ 0 · Định hướng & kế hoạch đề án" làm phân hệ thứ 14: **đồng ý**.
+- ✅ **(v0.2, đã trả lời 16/10)** Đưa Khảo sát lên ngay sau M2: **không**, giữ lộ trình theo 5 bước (M4).
+- ✅ **(v0.2, đã trả lời 16/10)** Danh mục giá trị chuẩn: **CSDL ngành của Bộ** (ADR-013). Còn cần: file danh mục hoặc quyền kết nối.
 1. Bộ chỉ số/KPI cấp tỉnh và công thức chính thức.
 2. Phân loại chương trình STEM (hệ thống tham khảo dùng "CT1–CT5", chưa rõ nguồn).
 3. Mẫu báo cáo bắt buộc gửi Sở/Bộ.
