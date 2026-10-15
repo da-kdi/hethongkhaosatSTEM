@@ -1,0 +1,40 @@
+# Cấu hình Supabase CLI cho môi trường LOCAL (`supabase start`).
+# Xem docs/RUNBOOK.md. Production: cấu hình tương đương trong Dashboard.
+project_id = "hethongkhaosatstem"
+
+[api]
+enabled = true
+port = 54321
+# Schema được PostgREST phơi ra. Ghi trực tiếp vào bảng bị chặn bởi GRANT/RLS;
+# mọi ghi nghiệp vụ đi qua RPC security definer. (ADR-003: M1b gom hợp đồng vào schema `api`.)
+schemas = ["public", "graphql_public", "org", "iam", "cfg", "audit"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 16
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://localhost:5173"]
+jwt_expiry = 3600
+enable_signup = false
+
+[auth.email]
+enable_signup = false
+enable_confirmations = false
+
+# Đưa ngữ cảnh vai trò đang chọn vào JWT (claim active_assignment_id) — ADR-002
+[auth.hook.custom_access_token]
+enabled = true
+uri = "pg-functions://postgres/iam/custom_access_token_hook"

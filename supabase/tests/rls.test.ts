@@ -1,0 +1,174 @@
+/**
+ * Test RLS trên Postgres thật.
+ *  1. ĐỐI CHIẾU: với MỌI assignment demo, tập đơn vị/lớp/người/dữ liệu cá nhân mà Postgres trả về
+ *     phải TRÙNG KHỚP với bộ máy TS (src/domain/access.ts). Đảm bảo UI demo = bảo mật thật.
+ *  2. Kịch bản bảo mật: giả mạo ngữ cảnh, khóa cấu hình, audit append-only, token hook.
+ */
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import type pg from "pg";
+import { asUser, createTestDb, dropTestDb, ADMIN_URL } from "./db.ts";
+import { buildAccess } from "../../src/domain/access.ts";
+import { A, createDemoDataset, DEMO_TODAY, R, U } from "../../src/demo/seed.ts";
+
+const DB = "stem_test_rls";
+const ds = createDemoDataset();
+let pool: pg.Pool;
+
+describe.skipIf(!ADMIN_URL)("RLS · Postgres", () => {
+  beforeAll(async () => {
+    pool = await createTestDb(DB);
+  });
+  afterAll(async () => {
+    if (pool) await dropTestDb(pool, DB);
+  });
+
+  describe("Đối chiếu TS ↔ SQL cho mọi ngữ cảnh demo", () => {
+    for (const asg of ds.assignments) {
+      it(`${asg.roleCode} @ ${ds.units.find((u) => u.id === asg.scopeUnitId)?.code} (${asg.id.slice(-3)})`, async () => {
+        const access = buildAccess(ds, asg.accountId, asg.id, DEMO_TODAY);
+        expect(access).not.toBeNull();
+        const sql = await asUser(pool, { sub: asg.accountId, active_assignment_id: asg.id }, async (q) => ({
+          units: (await q<{ id: string }>("select id from org.unit")).map((r) => r.id).sort(),
+          classes: (await q<{ id: string }>("select id from org.class")).map((r) => r.id).sort(),
+          persons: (await q<{ id: string }>("select id from iam.person")).map((r) => r.id).sort(),
+          personal: (await q<{ person_id: string }>("select person_id from iam.person_private")).map((r) => r.person_id).sort(),
+        }));
+        const ts = {
+          units: ds.units.filter((u) => access!.canSeeUnit(u.id)).map((u) => u.id).sort(),
+          classes: ds.classes.filter((c) => access!.canSeeClass(c.id)).map((c) => c.id).sort(),
+          persons: ds.persons.filter((p) => access!.canSeePerson(p.id)).map((p) => p.id).sort(),
+          personal: ds.persons.filter((p) => access!.canSeePersonal(p.id)).map((p) => p.id).sort(),
+        };
+        expect(sql).toEqual(ts);
+      });
+    }
+  });
+
+  describe("Kịch bản bảo mật", () => {
+    it("không có JWT / không chọn ngữ cảnh → không thấy gì", async () => {
+      const n = await asUser(pool, { sub: A.bmPrincipal }, async (q) => (await q("select id from org.unit")).length);
+      expect(n).toBe(0);
+    });
+
+    it("giả mạo active_assignment_id của người khác → không thấy gì", async () => {
+      const n = await asUser(pool, { sub: A.bmAnh, active_assignment_id: R.bmPrincipal }, async (q) =>
+        (await q("select id from iam.person")).length);
+      expect(n).toBe(0);
+    });
+
+    it("claim sai định dạng không gây lỗi, chỉ trả rỗng", async () => {
+      const n = await asUser(pool, { sub: A.bmAnh, active_assignment_id: "x'; drop table iam.person; --" }, async (q) =>
+        (await q("select id from iam.person")).length);
+      expect(n).toBe(0);
+    });
+
+    it("authenticated không ghi trực tiếp được vào bảng", async () => {
+      await expect(
+        asUser(pool, { sub: A.bmAdmin, active_assignment_id: R.bmAdmin }, (q) =>
+          q("insert into org.unit (parent_id, type, code, name) values ($1, 'TO', 'X', 'X')", [U.bm])),
+      ).rejects.toThrow(/permission denied/);
+    });
+
+    it("switch_context chỉ chấp nhận ngữ cảnh của chính mình", async () => {
+      await asUser(pool, { sub: A.tsNgoc, active_assignment_id: R.tsNgocTeacher }, async (q) => {
+        const ctxs = await q<{ role_code: string }>("select role_code from iam.my_contexts()");
+        expect(ctxs.map((c) => c.role_code).sort()).toEqual(["GUARDIAN", "TEACHER"]);
+        await q("select iam.switch_context($1)", [R.tsNgocGuardian]);
+      });
+      await expect(
+        asUser(pool, { sub: A.tsNgoc }, (q) => q("select iam.switch_context($1)", [R.bmPrincipal])),
+      ).rejects.toThrow(/Ngữ cảnh không hợp lệ/);
+    });
+
+    it("custom access token hook đưa ngữ cảnh đã chọn vào JWT", async () => {
+      const client = await pool.connect();
+      try {
+        await client.query("begin");
+        await client.query("update iam.account set current_assignment_id = $1 where id = $2", [R.bmLanHead, A.bmLan]);
+        await client.query("set local role supabase_auth_admin");
+        const { rows } = await client.query("select iam.custom_access_token_hook($1::jsonb) as e", [
+          JSON.stringify({ user_id: A.bmLan, claims: { sub: A.bmLan, role: "authenticated" } }),
+        ]);
+        expect(rows[0].e.claims.active_assignment_id).toBe(R.bmLanHead);
+      } finally {
+        await client.query("rollback");
+        client.release();
+      }
+    });
+
+    it("Sở khóa MANDATORY → trường không tắt được module Kế hoạch", async () => {
+      await expect(
+        asUser(pool, { sub: A.bmAdmin, active_assignment_id: R.bmAdmin }, (q) =>
+          q("select cfg.set_setting($1, 'module.plan', '{\"enabled\": false}', 'AUTONOMOUS')", [U.bm])),
+      ).rejects.toThrow(/đã bị cấp trên khóa/);
+    });
+
+    it("QTV trường bật/tắt module trong phạm vi → có version & audit", async () => {
+      await asUser(pool, { sub: A.bmAdmin, active_assignment_id: R.bmAdmin }, async (q) => {
+        const [row] = await q<{ version: number }>(
+          "select (cfg.set_setting($1, 'module.assess', '{\"enabled\": false}', 'AUTONOMOUS')).version", [U.bm]);
+        expect(row.version).toBe(1);
+        const [again] = await q<{ version: number }>(
+          "select (cfg.set_setting($1, 'module.assess', '{\"enabled\": true}', 'AUTONOMOUS')).version", [U.bm]);
+        expect(again.version).toBe(2);
+        const logs = await q("select 1 from audit.log where entity = 'cfg.setting' and unit_id = $1 and actor_account = $2", [U.bm, A.bmAdmin]);
+        expect(logs.length).toBe(2);
+      });
+    });
+
+    it("QTV trường không sửa được cấu hình trường khác", async () => {
+      await expect(
+        asUser(pool, { sub: A.bmAdmin, active_assignment_id: R.bmAdmin }, (q) =>
+          q("select cfg.set_setting($1, 'module.assess', '{\"enabled\": false}', 'AUTONOMOUS')", [U.ts])),
+      ).rejects.toThrow(/Không có quyền/);
+    });
+
+    it("EXTEND: trường không đổi được kiểu dữ liệu danh mục của Sở", async () => {
+      await expect(
+        asUser(pool, { sub: A.bmAdmin, active_assignment_id: R.bmAdmin }, (q) =>
+          q("select cfg.set_setting($1, 'catalog.activity_types', '{\"x\": 1}', 'EXTEND')", [U.bm])),
+      ).rejects.toThrow(/cùng kiểu/);
+    });
+
+    it("audit.log append-only và không lưu giá trị dữ liệu cá nhân", async () => {
+      const client = await pool.connect();
+      try {
+        await client.query("begin");
+        await expect(client.query("delete from audit.log")).rejects.toThrow(/append-only/);
+        await client.query("rollback");
+        const { rows } = await client.query(
+          "select summary from audit.log where entity = 'iam.person_private' limit 1");
+        expect(rows[0].summary).toHaveProperty("changed");
+        expect(rows[0].summary).not.toHaveProperty("new");
+        expect(JSON.stringify(rows[0].summary)).not.toMatch(/09000/);
+      } finally {
+        client.release();
+      }
+    });
+
+    it("cấu hình hiệu lực khớp bản TS (EXTEND hợp nhất danh mục)", async () => {
+      const [row] = await asUser(pool, { sub: A.bmPrincipal, active_assignment_id: R.bmPrincipal }, (q) =>
+        q<{ value: string[]; mode: string }>("select value, mode from cfg.effective($1, 'catalog.activity_types')", [U.bm]));
+      expect(row.mode).toBe("EXTEND");
+      expect(row.value).toEqual(["Bài học STEM", "Hoạt động trải nghiệm STEM", "Nghiên cứu khoa học kỹ thuật", "CLB Robotics"]);
+    });
+
+    it("module Phòng & thiết bị tắt ở Sao Mai, bật ở Bình Minh (cfg.my_modules)", async () => {
+      const sm = await asUser(pool, { sub: A.smPrincipal, active_assignment_id: R.smPrincipal }, (q) =>
+        q<{ module: string; enabled: boolean }>("select * from cfg.my_modules()"));
+      expect(sm.find((m) => m.module === "resource")?.enabled).toBe(false);
+      const gv = await asUser(pool, { sub: A.bmAnh, active_assignment_id: R.bmAnh }, (q) =>
+        q<{ module: string; enabled: boolean }>("select * from cfg.my_modules()"));
+      expect(gv.find((m) => m.module === "resource")?.enabled).toBe(true);
+    });
+
+    it("grant NCC hết hạn: trước hạn thấy lớp, sau hạn không thấy", async () => {
+      const before = await asUser(pool, { sub: A.kdiAdmin, active_assignment_id: R.kdiAdmin },
+        async (q) => (await q("select id from org.class")).length, "2026-06-01");
+      const after = await asUser(pool, { sub: A.kdiAdmin, active_assignment_id: R.kdiAdmin },
+        async (q) => (await q("select id from org.class")).length);
+      expect(before).toBe(2);
+      expect(after).toBe(0);
+    });
+  });
+});
