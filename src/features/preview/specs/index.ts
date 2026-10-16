@@ -12,10 +12,11 @@ import { SESSION } from "./session";
 import { SURVEY } from "./survey";
 import { TRAINING } from "./training";
 import { WORKFLOW } from "./workflow";
+import { EXTRA } from "./extra";
 
 /** Khóa `cổng:slug` (riêng theo vai trò) hoặc `slug` (dùng chung) */
 export const SPECS: Record<string, PreviewSpec> = {
-  ...PLAN, ...TRAINING, ...PROGRAM, ...RESOURCE, ...ORG, ...SCHEDULE, ...SESSION, ...ASSESS, ...WORKFLOW, ...REPORT, ...SURVEY, ...INTEGRATION,
+  ...PLAN, ...TRAINING, ...PROGRAM, ...RESOURCE, ...ORG, ...SCHEDULE, ...SESSION, ...ASSESS, ...WORKFLOW, ...REPORT, ...SURVEY, ...INTEGRATION, ...EXTRA,
 };
 
 export function previewSpec(portal: Portal, slug: string): PreviewSpec | undefined {

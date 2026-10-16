@@ -1,7 +1,7 @@
 import {
   BadgeCheck, Bell, ListTree, BookA, BookOpen, Box, CalendarClock, ClipboardCheck, Flag, Lightbulb, Map, Package, Plug, Route, UserCheck, Wrench, CalendarDays, ChartColumn, CircleCheck, ClipboardList, FlaskConical, Gauge,
   GraduationCap, Handshake, IdCard, Link2, MessageSquare, Network, Rocket, School, ScrollText, Send, Shield,
-  SlidersHorizontal, Palette, Star, Target, TriangleAlert, Upload, Users, type LucideIcon,
+  SlidersHorizontal, Palette, Star, Trophy, Pencil, Building2, Clock, Target, TriangleAlert, Upload, Users, type LucideIcon,
 } from "lucide-react";
 
 const MAP: Record<string, LucideIcon> = {
@@ -10,7 +10,7 @@ const MAP: Record<string, LucideIcon> = {
   check: CircleCheck, network: Network, users: Users, shield: Shield, sliders: SlidersHorizontal, scroll: ScrollText,
   id: IdCard, link: Link2, box: Box, upload: Upload, handshake: Handshake, book: BookOpen, star: Star, rocket: Rocket,
   message: MessageSquare, route: Route, map: Map, "book-a": BookA, "clipboard-check": ClipboardCheck, package: Package,
-  wrench: Wrench, "user-check": UserCheck, plug: Plug, bell: Bell, lightbulb: Lightbulb, flag: Flag, "calendar-clock": CalendarClock, list: ListTree, palette: Palette,
+  wrench: Wrench, "user-check": UserCheck, plug: Plug, bell: Bell, lightbulb: Lightbulb, flag: Flag, "calendar-clock": CalendarClock, list: ListTree, palette: Palette, trophy: Trophy, pencil: Pencil, building: Building2, clock: Clock,
 };
 
 export function NavIcon({ name, className }: { name: string; className?: string }) {

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { previewSpec } from "./specs/index";
-import type { Block, Cell, Tone } from "./types";
+import type { Block, Cell, Question, Tone } from "./types";
 
 const BADGE: Record<Tone, "default" | "success" | "warning" | "danger" | "muted" | "outline"> = {
   default: "default", success: "success", warning: "warning", danger: "danger", muted: "muted", info: "outline",
@@ -166,7 +166,7 @@ function PreviewBlock({ block: b, onAction }: { block: Block; onAction: () => vo
     case "week":
       return (
         <Section title={b.title} description={b.desc}>
-          <div className="relative -mx-4 overflow-x-auto px-4">
+          <div className="relative -mx-5 overflow-x-auto px-5">
             <div className="grid min-w-[700px] gap-2" style={{ gridTemplateColumns: `repeat(${b.days.length}, minmax(0, 1fr))` }}>
               {b.days.map((d) => (
                 <div key={d.day} className="rounded-lg bg-muted/50 p-2">
@@ -215,12 +215,118 @@ function PreviewBlock({ block: b, onAction }: { block: Block; onAction: () => vo
           </div>
         </Section>
       );
+    case "chips":
+      return (
+        <Section title={b.title} description={b.desc}>
+          <div className="grid gap-3">
+            {b.groups.map((g) => (
+              <div key={g.label}>
+                <div className="mb-1.5 text-[11px] font-bold tracking-wide text-muted-foreground uppercase">{g.label}</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {g.items.map((x) => <span key={x} className="rounded-lg border bg-card px-2.5 py-1 text-xs font-medium">{x}</span>)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Section>
+      );
+    case "questions":
+      return (
+        <Section title={b.title} description={b.desc}>
+          {b.progress !== undefined && (
+            <div className="mb-4 flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted"><span className="block h-full rounded-full bg-primary" style={{ width: `${b.progress}%` }} /></span>
+              {b.progress}%
+            </div>
+          )}
+          <ol className="grid grid-cols-[minmax(0,1fr)] gap-5">
+            {b.questions.map((q, i) => <QuestionView key={i} q={q} n={i + 1} />)}
+          </ol>
+          {b.submit && <Button className="mt-5" onClick={onAction}>{b.submit}</Button>}
+        </Section>
+      );
     case "note":
       return (
         <div className={cn("rounded-xl border p-4 text-sm", b.tone === "warning" ? "border-warning/50 bg-warning/10" : b.tone === "danger" ? "border-destructive/40 bg-destructive/5" : "bg-card")}>
           <div className="font-semibold">{b.title}</div>
           <p className="mt-1 text-muted-foreground">{b.text}</p>
         </div>
+      );
+  }
+}
+
+function QuestionView({ q, n }: { q: Question; n: number }) {
+  const head = (
+    <div className="mb-2 text-sm font-medium">
+      {n}. {q.title}{q.required && <span className="text-destructive"> *</span>}
+      {q.logic && <span className="ml-2 rounded bg-highlight/20 px-1.5 py-0.5 text-[10px] font-semibold">Hiện khi: {q.logic}</span>}
+    </div>
+  );
+  switch (q.type) {
+    case "single":
+    case "multi":
+      return (
+        <li>{head}
+          <div className="grid gap-1.5 sm:grid-cols-2">
+            {q.options.map((o, i) => {
+              const on = q.selected?.includes(i);
+              return (
+                <span key={o} className={cn("flex items-center gap-2 rounded-lg border px-3 py-2 text-sm", on && "border-primary bg-accent")}>
+                  <span className={cn("grid size-4 shrink-0 place-items-center border", q.type === "single" ? "rounded-full" : "rounded", on ? "border-primary bg-primary" : "border-input")}>
+                    {on && <span className={cn("bg-primary-foreground", q.type === "single" ? "size-1.5 rounded-full" : "size-2 rounded-[2px]")} />}
+                  </span>{o}
+                </span>
+              );
+            })}
+          </div>
+        </li>
+      );
+    case "rating":
+      return (
+        <li>{head}
+          <div className="flex gap-1.5">
+            {Array.from({ length: q.max }, (_, i) => (
+              <span key={i} className={cn("grid size-9 place-items-center rounded-lg border text-lg", q.value && i < q.value ? "border-highlight bg-highlight/20 text-[color-mix(in_oklch,var(--brand-accent)_75%,black)]" : "text-muted-foreground")}>★</span>
+            ))}
+          </div>
+        </li>
+      );
+    case "nps":
+      return (
+        <li>{head}
+          <div className="flex flex-wrap gap-1">
+            {Array.from({ length: 11 }, (_, i) => (
+              <span key={i} className={cn("grid size-8 place-items-center rounded-md border text-xs font-semibold", q.value === i ? "border-primary bg-primary text-primary-foreground" : i <= 6 ? "text-destructive" : i <= 8 ? "text-muted-foreground" : "text-success")}>{i}</span>
+            ))}
+          </div>
+          <div className="mt-1 flex justify-between text-[11px] text-muted-foreground"><span>Không</span><span>Chắc chắn</span></div>
+        </li>
+      );
+    case "matrix":
+      return (
+        <li>{head}
+          <div className="relative -mx-5 overflow-x-auto px-5">
+            <table className="w-full min-w-[480px] text-xs">
+              <thead><tr><th />{q.cols.map((c) => <th key={c} className="px-1 py-1.5 font-medium text-muted-foreground">{c}</th>)}</tr></thead>
+              <tbody>
+                {q.rows.map((r, ri) => (
+                  <tr key={r} className="border-t">
+                    <td className="py-2 pr-2 text-sm">{r}</td>
+                    {q.cols.map((c, ci) => (
+                      <td key={c} className="text-center"><span className={cn("inline-block size-4 rounded-full border", q.picks?.[ri] === ci ? "border-primary bg-primary" : "border-input")} /></td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </li>
+      );
+    case "text":
+      return (
+        <li>{head}
+          <div className={cn("rounded-lg border bg-muted/40 px-3 py-2 text-sm text-muted-foreground", q.long && "min-h-20")}>{q.placeholder ?? "Câu trả lời…"}</div>
+        </li>
       );
   }
 }

@@ -22,7 +22,7 @@ export function RolesPage({ access }: { access: AccessContext }) {
         description="Quyền = vai trò × phạm vi dữ liệu × quan hệ. Ma trận này là nguồn chân lý dùng chung cho giao diện và chính sách RLS trong cơ sở dữ liệu."
       />
       <Section title="Vai trò hệ thống × quyền" description="Cột được tô là vai trò bạn đang dùng. Vai trò tùy chỉnh theo trường có ở M1.">
-        <div className="relative -mx-4 overflow-x-auto px-4">
+        <div className="relative -mx-5 overflow-x-auto px-5">
           <table className="w-full min-w-[980px] border-separate border-spacing-0 text-xs">
             <thead>
               <tr>

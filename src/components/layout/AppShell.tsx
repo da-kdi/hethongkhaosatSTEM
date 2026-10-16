@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { LogOut, Menu, Moon, Repeat, Sun, X } from "lucide-react";
+import { CalendarRange, ChevronRight, LogOut, Menu, Moon, Repeat, Search, Sun, X } from "lucide-react";
 import { toast } from "sonner";
 import { actions, TODAY, useStore } from "@/app/store";
 import { PORTAL_STYLE } from "@/app/portal-style";
@@ -20,8 +20,16 @@ export function AppShell({ access, activeSlug, children }: { access: AccessConte
   const [navOpen, setNavOpen] = useState(false);
   const [switchOpen, setSwitchOpen] = useState(false);
   const [theme, setTheme] = useState(currentTheme());
+  const [q, setQ] = useState("");
   const navigate = useNavigate();
-  const menu = buildMenu(ds, access);
+  const fullMenu = buildMenu(ds, access);
+  const norm = (x: string) => x.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+  const menu = q.trim()
+    ? fullMenu.map((g) => ({ ...g, items: g.items.filter((i) => norm(i.label).includes(norm(q.trim()))) })).filter((g) => g.items.length)
+    : fullMenu;
+  const activeGroup = fullMenu.find((g) => g.items.some((i) => i.slug === activeSlug));
+  const activeItem = activeGroup?.items.find((i) => i.slug === activeSlug);
+  const year = ds.years.find((y) => y.isCurrent);
   const person = ds.persons.find((p) => p.id === access.personId);
   const contexts = assignmentsOf(ds, session.accountId!, TODAY);
   const style = PORTAL_STYLE[access.role.portal];
@@ -29,13 +37,25 @@ export function AppShell({ access, activeSlug, children }: { access: AccessConte
 
   const sidebar = (
     <nav aria-label="Menu chính" className="flex h-full flex-col">
-      <div className="flex h-16 items-center gap-2 border-b px-4">
+      <div className="flex h-16 items-center gap-2 px-4">
         <BrandLockup brand={brand} />
+      </div>
+      <div className="grid gap-2 px-3">
+        <div className="flex items-center gap-2 rounded-lg border bg-card px-2.5 py-1.5 text-xs">
+          <CalendarRange className="size-3.5 text-primary" aria-hidden />
+          <span className="font-semibold">Năm học {year?.code.replace("-", " – ")}</span>
+          <span className="ml-auto rounded bg-accent px-1.5 py-0.5 text-[10px] font-semibold text-primary">HK I</span>
+        </div>
+        <label className="relative block">
+          <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" aria-hidden />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Tìm chức năng…" aria-label="Tìm chức năng trong menu"
+            className="h-8 w-full rounded-lg border bg-muted/50 pr-2 pl-8 text-xs outline-none placeholder:text-muted-foreground focus:border-primary focus:bg-card" />
+        </label>
       </div>
       <button
         type="button"
         onClick={() => setSwitchOpen(true)}
-        className="mx-3 mt-3 rounded-lg border bg-card px-3 py-2 text-left transition-colors hover:bg-accent"
+        className="mx-3 mt-3 rounded-xl border bg-card px-3 py-2 text-left transition-colors hover:bg-accent"
       >
         <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold", style.chip)}>
           <span className={cn("size-1.5 rounded-full", style.dot)} />
@@ -50,9 +70,10 @@ export function AppShell({ access, activeSlug, children }: { access: AccessConte
         )}
       </button>
       <div className="flex-1 overflow-y-auto px-3 py-3">
+        {menu.length === 0 && <p className="px-2 text-xs text-muted-foreground">Không tìm thấy chức năng.</p>}
         {menu.map((g) => (
           <div key={g.label} className="mb-4">
-            <div className="px-2 pb-1 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">{g.label}</div>
+            <div className="px-2 pb-1.5 text-[10.5px] font-bold tracking-wider text-muted-foreground/80 uppercase">{g.label}</div>
             <ul>
               {g.items.map((it) => {
                 const active = it.slug === activeSlug;
@@ -64,14 +85,16 @@ export function AppShell({ access, activeSlug, children }: { access: AccessConte
                       onClick={() => setNavOpen(false)}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm transition-colors",
-                        active ? "bg-primary text-primary-foreground shadow-[inset_3px_0_0_var(--brand-accent)]" : "text-foreground/80 hover:bg-accent hover:text-accent-foreground",
+                        "relative flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[13.5px] transition-colors",
+                        active
+                          ? "bg-accent font-semibold text-primary before:absolute before:top-1.5 before:bottom-1.5 before:-left-3 before:w-1 before:rounded-r-full before:bg-highlight"
+                          : "font-medium text-foreground/75 hover:bg-muted hover:text-foreground",
                       )}
                     >
                       <NavIcon name={it.icon} className="size-4 shrink-0" />
                       <span className="flex-1 truncate">{it.label}</span>
                       {it.milestone !== "M0" && (
-                        <span className={cn("rounded px-1 text-[10px] font-medium", active ? "bg-white/20" : "bg-muted text-muted-foreground")}>
+                        <span className={cn("rounded px-1 text-[10px] font-semibold", active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
                           {it.milestone}
                         </span>
                       )}
@@ -83,16 +106,21 @@ export function AppShell({ access, activeSlug, children }: { access: AccessConte
           </div>
         ))}
       </div>
-      <div className="border-t p-3 text-xs text-muted-foreground">
-        <div className="truncate font-medium text-foreground">{person?.fullName}</div>
-        <div className="truncate">{ds.accounts.find((a) => a.id === session.accountId)?.email}</div>
+      <div className="flex items-center gap-2.5 border-t p-3 text-xs text-muted-foreground">
+        <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary/10 text-[11px] font-bold text-primary">
+          {person?.fullName.split(" ").slice(-2).map((w) => w[0]).join("")}
+        </span>
+        <span className="min-w-0">
+          <span className="block truncate text-[13px] font-semibold text-foreground">{person?.fullName}</span>
+          <span className="block truncate">{ds.accounts.find((a) => a.id === session.accountId)?.email}</span>
+        </span>
       </div>
     </nav>
   );
 
   return (
     <div className="flex min-h-full">
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 border-r bg-sidebar lg:block">{sidebar}</aside>
+      <aside className="sticky top-0 hidden h-screen w-[268px] shrink-0 border-r bg-sidebar lg:block">{sidebar}</aside>
 
       {navOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
@@ -113,7 +141,17 @@ export function AppShell({ access, activeSlug, children }: { access: AccessConte
           </Button>
           {brand.mark && <img src={brand.mark} alt="" className="size-7 rounded-md bg-white object-contain lg:hidden" />}
           <div className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
-            <span className="hidden sm:inline">{access.scopeUnit.name}</span>
+            <span className="hidden items-center gap-1.5 sm:flex">
+              <span className="truncate">{access.scopeUnit.name}</span>
+              {activeGroup && activeItem && activeSlug !== "tong-quan" && (
+                <>
+                  <ChevronRight className="size-3.5 shrink-0" aria-hidden />
+                  <span className="truncate">{activeGroup.label.replace(/^[\d.]+ · /, "")}</span>
+                  <ChevronRight className="size-3.5 shrink-0" aria-hidden />
+                  <span className="truncate font-medium text-foreground">{activeItem.label}</span>
+                </>
+              )}
+            </span>
           </div>
           {DATA_MODE === "demo" && (
             <span className="hidden rounded-full bg-highlight/25 px-2.5 py-1 text-xs font-medium text-foreground sm:inline">Chế độ demo · dữ liệu hư cấu</span>
@@ -132,7 +170,7 @@ export function AppShell({ access, activeSlug, children }: { access: AccessConte
             <LogOut /> <span className="hidden sm:inline">Đăng xuất</span>
           </Button>
         </header>
-        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6">{children}</main>
+        <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
       </div>
 
       <Dialog open={switchOpen} onOpenChange={setSwitchOpen}>

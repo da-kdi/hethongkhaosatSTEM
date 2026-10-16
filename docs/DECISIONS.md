@@ -103,3 +103,8 @@
 7. Tách vai trò KDI-nhà cung cấp và KDI-đơn vị vận hành nền tảng.
 8. Yêu cầu ký số báo cáo.
 9. Cấp quản lý trường MN/TH/THCS sau sắp xếp chính quyền 2 cấp (Sở hay UBND xã).
+
+## ADR-017 · Làm mới giao diện & mở rộng phân hệ 0.2 Khảo sát (16/10/2026)
+- **Giao diện:** tham khảo xu hướng của các nền tảng STEM hiện có (đã xem bằng tài khoản demo công khai) để định hướng phong cách — **không sao chép** bố cục, nhãn hiệu, mã nguồn hay số liệu. Thay đổi: tiêu đề đậm hơn (Be Vietnam Pro 700/800), thẻ bo 16px có bóng nhẹ, mục menu đang chọn dạng nền nhạt + thanh nhấn màu cam, ô tìm chức năng, chip năm học, breadcrumb, avatar; dashboard Sở/Trường có băng chào theo màu đơn vị, thẻ KPI có biểu tượng và biến động, "Cần làm", "Thao tác nhanh", biểu đồ cột, vòng tiến độ.
+- **Chỉ số STEM & phân loại** (minh họa, `src/demo/insights.ts`): 6 trụ cột riêng của hệ thống (Kế hoạch & quản trị, Đội ngũ, Cơ sở vật chất, Dạy học STEM, Đánh giá & sản phẩm, Dữ liệu & báo cáo) và 4 mức Tốt/Khá/Đạt/Cần hỗ trợ theo ngưỡng Sở cấu hình; ô theo xã/phường thay cho bản đồ địa lý (không cần dữ liệu ranh giới).
+- **Khảo sát (M4):** lấy phạm vi từ hệ thống khảo sát KDI (`da-kdi/khaosat-kdi`): Survey Workspace (vòng đời Nháp → Đang mở → Tạm dừng → Đã đóng → Lưu trữ), Dynamic Form Builder (33 loại câu hỏi, logic AND/OR, phiên bản bất biến, cờ PII), Distribution (link, mã truy cập, lời mời token dùng một lần lưu băm, QR), Response Intelligence (phễu bỏ dở, cross-tab, xuất Excel/CSV, view Power BI). Khi build M4: tái sử dụng gói `survey-core` (TS thuần) của repo đó thay vì viết lại; khác biệt là đối tượng phát lấy theo đơn vị/vai trò của hệ thống STEM và kết quả nối vào Bộ chỉ số (CS15) và Bước 5.

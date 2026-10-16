@@ -41,7 +41,7 @@
   --brand-accent: #f7a934;
   --brand-accent-fg: #1f2937;
 
-  --background: oklch(0.985 0.004 250);
+  --background: oklch(0.982 0.005 255);
   --foreground: oklch(0.22 0.025 255);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.22 0.025 255);
@@ -109,6 +109,13 @@ body {
 }
 
 /* Số liệu dùng chữ số đều để bảng/KPI thẳng cột */
+.shadow-card {
+  box-shadow: 0 1px 2px rgb(16 24 40 / 0.04), 0 1px 3px rgb(16 24 40 / 0.05);
+}
+[data-theme="dark"] .shadow-card {
+  box-shadow: none;
+}
+
 .tabular {
   font-variant-numeric: tabular-nums;
 }

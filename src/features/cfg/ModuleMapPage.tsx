@@ -76,7 +76,7 @@ export function ModuleMapPage({ access }: { access: AccessContext }) {
         </Section>
 
         <Section title="Phân hệ × 5 bước triển khai đề án" description="Ô đánh dấu là bước phân hệ tham gia.">
-          <div className="relative -mx-4 overflow-x-auto px-4">
+          <div className="relative -mx-5 overflow-x-auto px-5">
             <table className="w-full min-w-[640px] text-sm">
               <thead>
                 <tr>

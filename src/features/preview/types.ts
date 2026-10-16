@@ -17,7 +17,18 @@ export type Block =
   | { kind: "week"; title: string; desc?: string; days: { day: string; items: { time: string; label: string; meta?: string; tone?: Tone }[] }[]; span?: 2 }
   | { kind: "form"; title: string; desc?: string; fields: { label: string; value?: string; wide?: boolean }[]; submit: string; span?: 2 }
   | { kind: "chat"; title: string; desc?: string; messages: { from: string; me?: boolean; text: string; at: string }[]; span?: 2 }
-  | { kind: "note"; title: string; text: string; tone?: Tone; span?: 2 };
+  | { kind: "note"; title: string; text: string; tone?: Tone; span?: 2 }
+  /** Nhóm nhãn (vd. bảng loại câu hỏi của trình tạo phiếu) */
+  | { kind: "chips"; title: string; desc?: string; groups: { label: string; items: string[] }[]; span?: 2 }
+  /** Phiếu khảo sát như người trả lời nhìn thấy */
+  | { kind: "questions"; title: string; desc?: string; progress?: number; questions: Question[]; submit?: string; span?: 2 };
+
+export type Question =
+  | { type: "single" | "multi"; title: string; options: string[]; selected?: number[]; required?: boolean; logic?: string }
+  | { type: "rating"; title: string; max: number; value?: number; required?: boolean; logic?: string }
+  | { type: "nps"; title: string; value?: number; required?: boolean; logic?: string }
+  | { type: "matrix"; title: string; rows: string[]; cols: string[]; picks?: number[]; required?: boolean; logic?: string }
+  | { type: "text"; title: string; placeholder?: string; long?: boolean; required?: boolean; logic?: string };
 
 export interface PreviewSpec {
   /** Mô tả ngắn dưới tiêu đề */

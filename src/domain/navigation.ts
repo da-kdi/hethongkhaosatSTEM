@@ -61,6 +61,15 @@ const ADMIN = (): NavGroup => ({
   ],
 });
 
+/** Nhóm khảo sát cho đơn vị quản lý (Sở, Trường) — theo các module của hệ thống khảo sát KDI (khaosat-kdi) */
+const SURVEY_ADMIN = (scope: string): NavItem[] => [
+  it("khao-sat", "Tổng quan khảo sát", "clipboard-check", "survey", "M4", ["survey.form.view"], scope),
+  it("khao-sat-tao", "Khảo sát & trình tạo phiếu", "pencil", "survey", "M4", ["survey.form.manage"], "Tạo trống/từ mẫu/nhân bản; 33 loại câu hỏi; logic hiển thị; phiên bản bất biến."),
+  it("khao-sat-mau", "Thư viện mẫu", "book", "survey", "M4", ["survey.form.view"]),
+  it("khao-sat-phan-phoi", "Phân phối & lời mời", "link", "survey", "M4", ["survey.form.manage"], "Link công khai, mã truy cập, lời mời riêng dùng một lần, QR, lịch mở/đóng."),
+  it("khao-sat-phan-tich", "Phản hồi & phân tích", "bars", "survey", "M4", ["survey.form.view"], "Danh sách phản hồi, biểu đồ theo câu, cross-tab, phễu bỏ dở, xuất Excel/Power BI."),
+];
+
 const SURVEY_RESPOND = (): NavGroup => ph("survey", [
   it("khao-sat", "Khảo sát của tôi", "clipboard-check", "survey", "M4", ["survey.response.submit"], "Trả lời phiếu khảo sát được phát hành cho bạn; xem tiến độ."),
 ]);
@@ -86,6 +95,7 @@ export const NAVIGATION: Record<Portal, NavGroup[]> = {
     ph("program", [
       it("khung-chuong-trinh", "Khung chương trình STEM", "book", "program", "M5", ["program.content.view"]),
       it("tham-dinh", "Thẩm định & công bố học liệu", "check", "program", "M5", ["program.content.approve"], "Duyệt/trả lại học liệu của nhà cung cấp trước khi công bố."),
+      it("chuong-trinh-trien-khai", "Chương trình STEM đang triển khai", "rocket", "program", "M5", ["program.content.view"], "Chương trình/gói STEM theo trường, nhà cung cấp, mức bao phủ."),
     ]),
     ph("resource", [it("hieu-qua-thiet-bi", "Hiệu quả phòng & thiết bị", "box", "resource", "M6", ["resource.room.view"])]),
     ph("org", [it("truong-hoc", "Danh sách cơ sở giáo dục", "school", "org", READY, ["org.unit.view"])]),
@@ -100,8 +110,10 @@ export const NAVIGATION: Record<Portal, NavGroup[]> = {
       it("ky-bao-cao", "Kỳ báo cáo", "calendar", "report", "M8", ["report.submission.approve"], "Mở kỳ, điền sẵn từ dữ liệu, tiếp nhận/yêu cầu giải trình, khóa số liệu (Bước 5)."),
       it("de-xuat-cai-tien", "Đề xuất cải tiến", "lightbulb", "report", "M8", ["report.dashboard.view"]),
       it("chat-luong-du-lieu", "Chất lượng dữ liệu", "check", "report", "M8", ["report.dashboard.view"]),
+      it("xep-hang", "Xếp hạng & phân loại", "trophy", "report", "M8", ["report.dashboard.view"], "Chỉ số STEM theo trường, xã/phường; phân loại Tốt/Khá/Đạt/Cần hỗ trợ."),
+      it("bao-cao-bo", "Báo cáo Bộ GD&ĐT", "send", "report", "M8", ["report.submission.approve"], "Tổng hợp số liệu theo mẫu của Bộ, ký số và gửi."),
     ]),
-    ph("survey", [it("khao-sat", "Phiếu khảo sát & kết quả", "clipboard-check", "survey", "M4", ["survey.form.view"], "Khảo sát hiện trạng (Bước 1), hài lòng (Bước 4); tổng hợp theo trường.")]),
+    ph("survey", SURVEY_ADMIN("Khảo sát hiện trạng (Bước 1), hài lòng (Bước 4); phát cho trường theo vai trò, tổng hợp theo đơn vị.")),
     ph("integration", [it("tich-hop", "Tích hợp dữ liệu & AI", "plug", "integration", "M9", ["integration.connector.view"])]),
     ADMIN(),
   ],
@@ -113,13 +125,19 @@ export const NAVIGATION: Record<Portal, NavGroup[]> = {
       it("ke-hoach", "Kế hoạch STEM năm học", "flag", "plan", "M3", ["plan.plan.view"], "Kế hoạch năm/kỳ, phân bổ theo khối/tổ/GV, gửi Sở duyệt (Bước 2)."),
     ]),
     ph("training", [it("tap-huan", "Bồi dưỡng & năng lực GV", "graduation", "training", "M5", ["training.course.view"])]),
-    ph("program", [it("hoc-lieu", "Chương trình & học liệu", "book", "program", "M5", ["program.content.view"])]),
+    ph("program", [
+      it("hoc-lieu", "Chương trình & học liệu", "book", "program", "M5", ["program.content.view"]),
+      it("goi-stem", "Chương trình STEM triển khai", "rocket", "program", "M5", ["program.content.view"], "Chương trình/gói STEM trường đang triển khai, nhà cung cấp, lớp tham gia."),
+      it("ppct", "Phân phối chương trình STEM", "list", "program", "M5", ["program.content.view"], "Phân phối chủ đề/tiết STEM theo tuần cho từng khối."),
+    ]),
     ph("resource", [
+      it("co-so", "Tòa nhà & phòng học", "building", "resource", "M6", ["resource.room.view"]),
       it("phong-thiet-bi", "Phòng STEM & thiết bị", "box", "resource", "M6", ["resource.room.view"]),
       it("vat-tu", "Vật tư & tồn kho", "package", "resource", "M6", ["resource.stock.manage"]),
       it("bao-tri", "Bảo trì & bảo hành", "wrench", "resource", "M6", ["resource.room.manage"]),
     ]),
     ph("org", [
+      it("ho-so-truong", "Hồ sơ nhà trường", "school", "org", "M2", ["org.unit.view"], "Thông tin cơ sở giáo dục theo chuẩn QĐ 2768, điểm trường, quy mô."),
       it("hoc-sinh", "Lớp & học sinh", "users", "org", READY, ["org.class.view"]),
       it("nhan-su", "Giáo viên & tổ chuyên môn", "id", "org", READY, ["org.person.view"]),
       it("nhap-xuat-ho-so", "Nhập/xuất hồ sơ", "upload", "org", READY, ["org.person.manage", "report.export"], "Nhập/xuất Excel học sinh, giáo viên theo tên kỹ thuật QĐ 2768; kiểm tra toàn tệp trước khi ghi."),
@@ -128,6 +146,7 @@ export const NAVIGATION: Record<Portal, NavGroup[]> = {
     ]),
     ph("schedule", [
       it("lich-day", "Kế hoạch & lịch dạy STEM", "calendar", "schedule", "M6", ["schedule.lesson.view"]),
+      it("tkb", "Thời khóa biểu & tiết học", "clock", "schedule", "M6", ["schedule.lesson.view"], "Cấu hình ca/tiết, thời khóa biểu STEM theo tuần."),
       it("dat-lich", "Đặt phòng/thiết bị & xung đột", "calendar-clock", "schedule", "M6", ["schedule.booking.approve"], "Phát hiện trùng phòng/GV/thiết bị, chọn ưu tiên, tự từ chối kèm gợi ý (W4)."),
     ]),
     ph("session", [
@@ -137,7 +156,10 @@ export const NAVIGATION: Record<Portal, NavGroup[]> = {
     ph("assess", [it("danh-gia", "Kết quả đánh giá năng lực", "star", "assess", "M7", ["assess.task.view"])]),
     ph("workflow", [it("nhiem-vu", "Nhiệm vụ từ Sở", "clipboard", "workflow", "M3", ["workflow.directive.respond"])]),
     ph("report", [it("bao-cao", "Báo cáo định kỳ", "upload", "report", "M8", ["report.submission.create"])]),
-    ph("survey", [it("khao-sat", "Khảo sát", "clipboard-check", "survey", "M4", ["survey.form.view"])]),
+    ph("survey", [
+      ...SURVEY_ADMIN("Khảo sát của trường: phiếu Sở phát và phiếu trường tự tạo cho GV, HS, PH."),
+      it("tra-loi", "Phiếu cần trả lời", "send", "survey", "M4", ["survey.response.submit"]),
+    ]),
     ph("integration", [it("tich-hop", "Đồng bộ dữ liệu", "plug", "integration", "M9", ["integration.connector.view"])]),
     ADMIN(),
   ],
