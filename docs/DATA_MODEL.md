@@ -88,6 +88,16 @@ RPC `security definer` (mirror TS: `src/domain/orgOps.ts`), mỗi hàm kiểm qu
 | `org.upsert_student(p)` | `org.person.manage` | Mã HS 3–30 ký tự, chuẩn hóa chữ hoa, duy nhất; đổi lớp trong trường |
 | `org.set_student_status(id, st)` | `org.person.manage` | Đang học / Chuyển trường / Tốt nghiệp — không xóa hồ sơ |
 
+### Nhập/xuất hồ sơ (migration 0009, M2c-1)
+
+| RPC | Quyền | Ghi chú |
+|---|---|---|
+| `org.import_students(p)` | `org.person.manage` | `p.rows[]` theo tên kỹ thuật; tra lớp theo tên trong trường của ngữ cảnh; gọi lại `org.upsert_student`/`set_student_status`; lỗi → `Dòng N: …`, hủy cả lô; ghi 1 dòng audit `IMPORT` |
+| `org.import_teachers(p)` | `org.person.manage` | Tra tổ đang hoạt động theo tên; `idHeThong` để cập nhật; gọi `org.upsert_teacher` |
+| `org.log_export(kind, n)` | `report.export` | Dữ liệu xuất đọc qua RLS; RPC chỉ ghi audit `EXPORT` |
+
+Mirror TS: `src/domain/exchange.ts` (`planImport` chạy thử, `exportTable` chỉ xuất ngày sinh/SĐT khi có quyền xem dữ liệu cá nhân).
+
 Nhật ký: trigger trên `org.unit`, `org.class`, `org.staff_membership`, `org.teaching_assignment`; `org.enrollment` và `iam.person` ở chế độ PII (chỉ ghi tên cột thay đổi).
 
 ### catalog — Danh mục dùng chung (migration 0007, ADR-013)

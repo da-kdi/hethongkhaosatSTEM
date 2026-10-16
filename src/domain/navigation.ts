@@ -121,6 +121,7 @@ export const NAVIGATION: Record<Portal, NavGroup[]> = {
     ph("org", [
       it("hoc-sinh", "Lớp & học sinh", "users", "org", READY, ["org.class.view"]),
       it("nhan-su", "Giáo viên & tổ chuyên môn", "id", "org", READY, ["org.person.view"]),
+      it("nhap-xuat-ho-so", "Nhập/xuất hồ sơ", "upload", "org", READY, ["org.person.manage", "report.export"], "Nhập/xuất Excel học sinh, giáo viên theo tên kỹ thuật QĐ 2768; kiểm tra toàn tệp trước khi ghi."),
       it("lien-ket-phu-huynh", "Liên kết phụ huynh", "link", "org", "M2", ["iam.guardian.approve"], "Phát mã mời, xác minh, thu hồi liên kết (W8)."),
       it("doi-tac", "Nhà cung cấp & cấp quyền", "handshake", "org", "M2", ["iam.grant.manage"]),
     ]),

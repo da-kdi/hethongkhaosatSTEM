@@ -12,6 +12,7 @@ import { assignmentsOf, buildAccess, ancestorsOf, subtreeIds, type AccessContext
 import { canWriteSetting } from "@/domain/config";
 import { applyImport, type ImportInput } from "@/domain/catalog";
 import * as org from "@/domain/orgOps";
+import { exportTable, planImport, type ExchangeKind, type ImportPlan } from "@/domain/exchange";
 import type { AuditEntry, ConfigMode, Dataset } from "@/domain/model";
 import { createDemoDataset, DEMO_TODAY } from "@/demo/seed";
 
@@ -139,6 +140,33 @@ export const actions = {
     mutateOrg("org.teaching_assignment", p.remove ? "DELETE" : "INSERT", (ds, a) => [org.setTeaching(ds, a, p), p.classId], `Phân công ${p.subject}`),
   setStudentStatus: (personId: string, status: "STUDYING" | "TRANSFERRED" | "GRADUATED") =>
     mutateOrg("org.enrollment", "UPDATE", (ds, a) => [org.setStudentStatus(ds, a, personId, status), personId], `Trạng thái: ${status}`),
+  // ---------- Nhập/xuất hồ sơ theo tên kỹ thuật QĐ 2768 (mirror RPC org.import_* / org.log_export) ----------
+  /** Chạy thử: không ghi gì, trả kế hoạch (số mới/cập nhật, lỗi theo dòng). */
+  planImport(kind: ExchangeKind, table: string[][]): ImportPlan {
+    const access = getAccess();
+    if (!access || !access.has("org.person.manage")) throw new Error("Không có quyền nhập hồ sơ");
+    return planImport(state.ds, access, kind, table);
+  },
+  /** Ghi cả lô — chỉ khi không có lỗi (tất cả hoặc không). */
+  commitImport(kind: ExchangeKind, table: string[][], fileName?: string): ImportPlan {
+    const plan = actions.planImport(kind, table);
+    if (plan.errors.length || !plan.result) throw new Error(`Tệp còn ${plan.errors.length} lỗi, chưa ghi dữ liệu nào`);
+    const access = getAccess()!;
+    set({ ...state, ds: { ...plan.result, audit: audit(plan.result, state.session, {
+      action: "IMPORT", entity: kind === "students" ? "org.enrollment" : "org.staff_membership", entityId: fileName ?? "tệp nhập",
+      unitId: access.configUnitId, summary: `${plan.created} mới, ${plan.updated} cập nhật (${plan.total} dòng)` }) } });
+    return plan;
+  },
+  /** Xuất dữ liệu trong phạm vi (dữ liệu cá nhân chỉ khi có quyền) — ghi nhật ký EXPORT. */
+  exportRecords(kind: ExchangeKind): string[][] {
+    const access = getAccess();
+    if (!access || !access.has("report.export")) throw new Error("Không có quyền xuất dữ liệu");
+    const table = exportTable(state.ds, access, kind);
+    set({ ...state, ds: { ...state.ds, audit: audit(state.ds, state.session, {
+      action: "EXPORT", entity: kind === "students" ? "org.enrollment" : "org.staff_membership", entityId: `${table.length - 2} dòng`,
+      unitId: access.configUnitId, summary: `Xuất ${table.length - 2} hồ sơ ${kind === "students" ? "học sinh" : "giáo viên"}` }) } });
+    return table;
+  },
   /** Nạp danh mục — kiểm quyền giống catalog.import_code_list(): chỉ Quản trị nền tảng */
   importCodeList(input: ImportInput) {
     const access = getAccess();

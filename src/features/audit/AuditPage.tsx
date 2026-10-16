@@ -12,7 +12,8 @@ const ACTION_LABEL: Record<string, { label: string; variant: "default" | "succes
   INSERT: { label: "Tạo", variant: "success" },
   UPDATE: { label: "Sửa", variant: "warning" },
   DELETE: { label: "Xóa", variant: "danger" },
-  IMPORT: { label: "Nạp danh mục", variant: "default" },
+  IMPORT: { label: "Nhập dữ liệu", variant: "default" },
+  EXPORT: { label: "Xuất dữ liệu", variant: "warning" },
 };
 
 const ENTITY_LABEL: Record<string, string> = {

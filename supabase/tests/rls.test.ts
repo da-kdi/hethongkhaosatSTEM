@@ -261,6 +261,29 @@ describe.skipIf(!ADMIN_URL)("RLS · Postgres", () => {
         q("select org.upsert_department($1)", [JSON.stringify({ id: U.bmKhtn, name: "Tổ KHTN", status: "INACTIVE" })]))).rejects.toThrow(/còn quản lý lớp/);
     });
 
+    it("nhập hồ sơ theo lô (QĐ 2768): tất cả hoặc không, lỗi kèm số dòng; xuất ghi nhật ký", async () => {
+      await asUser(pool, { sub: A.bmAdmin, active_assignment_id: R.bmAdmin }, async (q) => {
+        const ok = { fileName: "hs.xlsx", rows: [
+          { row: 3, maHocSinh: "hs7001", hoTenNh: "Phan Gia Huy", gioiTinh: "NAM", ngaySinhNh: "2014-02-01", tenLop: "6a1" },
+          { row: 4, maHocSinh: "HS7002", hoTenNh: "Vũ Ngọc Mai", gioiTinh: "NU", tenLop: "7A1" },
+        ] };
+        expect((await q<{ r: { created: number } }>("select org.import_students($1) as r", [JSON.stringify(ok)]))[0].r).toEqual({ created: 2, updated: 0 });
+        expect((await q<{ r: { updated: number } }>("select org.import_students($1) as r", [JSON.stringify(ok)]))[0].r).toEqual({ created: 0, updated: 2 });
+        await q("savepoint bad");
+        const bad = { fileName: "x.xlsx", rows: [{ row: 3, maHocSinh: "HS7003", hoTenNh: "Lý Thu", tenLop: "6A1" }, { row: 4, maHocSinh: "HS7004", hoTenNh: "Ai Đó", tenLop: "9Z9" }] };
+        await expect(q("select org.import_students($1)", [JSON.stringify(bad)])).rejects.toThrow(/Dòng 4: Không có lớp/);
+        await q("rollback to savepoint bad");
+        expect(await q("select 1 from org.enrollment where student_code = 'HS7003'")).toHaveLength(0);
+        expect((await q<{ r: { created: number } }>("select org.import_teachers($1) as r",
+          [JSON.stringify({ fileName: "gv.csv", rows: [{ row: 3, hoVaTenDoiNgu: "Mạc Văn Toàn", gioiTinh: "NAM", toChuyenMon: "tổ khoa học tự nhiên" }] })]))[0].r.created).toBe(1);
+        await q("select org.log_export('students', 12)");
+        expect(await q("select 1 from audit.log where action = 'IMPORT' and unit_id = $1", [U.bm])).toHaveLength(3);
+        expect(await q("select 1 from audit.log where action = 'EXPORT' and unit_id = $1", [U.bm])).toHaveLength(1);
+      });
+      await expect(asUser(pool, { sub: A.bmPrincipal, active_assignment_id: R.bmPrincipal }, (q) =>
+        q("select org.import_students($1)", [JSON.stringify({ rows: [] })]))).rejects.toThrow(/Không có quyền/);
+    });
+
     it("grant NCC hết hạn: trước hạn thấy lớp, sau hạn không thấy", async () => {
       const before = await asUser(pool, { sub: A.kdiAdmin, active_assignment_id: R.kdiAdmin },
         async (q) => (await q("select id from org.class")).length, "2026-06-01");

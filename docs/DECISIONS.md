@@ -29,6 +29,8 @@
 
 ## ADR-008 · Thay `xlsx@0.18.5`
 - Bản trên npm còn lỗ hổng đã công bố. Import/export Excel (M2) sẽ dùng `exceljs` hoặc bản SheetJS đã vá.
+- ✅ **M2c-1:** dùng `exceljs@4.4.0`, tải động (chunk riêng, không vào bundle chính); ép `uuid ^11.1.1` qua `overrides` để hết cảnh báo audit (0 lỗ hổng). Tệp tối đa 5 MB / 5000 dòng; nhận cả `.csv`.
+- **Định dạng trao đổi:** dòng 1 = tên kỹ thuật QĐ 2768 (`maHocSinh`, `hoTenNh`, `gioiTinh`…), dòng 2 tùy chọn = tên nghiệp vụ; giới tính theo ISO/IEC 5218 (1/2). Nhập **tất cả hoặc không**: kiểm tra toàn tệp, báo lỗi theo dòng/cột, chỉ ghi khi không còn lỗi.
 
 ## ADR-009 · Cấu trúc 14 phân hệ × 5 tầng × 5 bước đề án (v0.2)
 - **Bối cảnh:** hình kiến trúc ghi 14 phân hệ; hình phân hệ có 13 ô (1–8, 0.1–0.5); quy trình đề án 5 bước.

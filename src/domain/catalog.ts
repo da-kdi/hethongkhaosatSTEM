@@ -103,7 +103,7 @@ export function initialCatalog(): CatalogState {
 export interface ParsedRow { line: number; code: string; name: string; validFrom?: string; validTo?: string }
 export interface ParseResult { rows: ParsedRow[]; errors: string[] }
 
-function splitCsvLine(line: string, sep: string): string[] {
+export function splitCsvLine(line: string, sep: string): string[] {
   const out: string[] = [];
   let cur = "";
   let q = false;
