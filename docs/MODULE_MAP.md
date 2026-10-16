@@ -48,6 +48,8 @@ Ghi chú:
 | `src/demo/seed.ts` | Kịch bản dữ liệu demo xuyên suốt, là nguồn của `supabase/seed.sql` |
 | `src/app/` | Router (hash history, chạy trên hosting tĩnh), store demo, truy vấn có phạm vi |
 | `src/features/` | Màn hình theo module |
+| `src/features/preview/` | Màn hình xem trước (đặc tả dữ liệu minh họa theo phân hệ) cho mục chưa triển khai — ADR-016 |
+| `src/domain/branding.ts`, `src/app/brand.tsx`, `src/lib/brand.ts` | Giao diện theo đơn vị `ui.brand` (ADR-015) |
 | `src/components/` | `ui/` (Radix + Tailwind, port từ stemtown-preview), `layout/` |
 
 **Menu động** = mục của cổng vai trò ∩ phân hệ bật tại đơn vị ngữ cảnh ∩ quyền. Nhóm menu mang số và tên phân hệ, theo thứ tự 0 → 8 → 0.1 → 0.5. `PageView` kiểm tra lại khi người dùng gõ URL trực tiếp.

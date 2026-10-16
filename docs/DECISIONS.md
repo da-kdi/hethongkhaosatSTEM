@@ -65,6 +65,16 @@
 
 ---
 
+## ADR-015 · Giao diện theo đơn vị (white-label) qua cấu hình `ui.brand` (16/10/2026)
+- **Yêu cầu:** hệ thống thay đổi được giao diện theo nhu cầu từng trường; nhận diện mặc định là KDI Education (xanh #154B98, cam #F7A934, logo KDI).
+- **Quyết định:** dùng lại cơ chế cấu hình kế thừa (ADR-005) với khóa `ui.brand` = `{appName, tagline, logo, mark, primary, accent, radius}`. Kế thừa **theo từng thuộc tính** (trường chỉ đổi màu vẫn giữ logo của cấp trên); Sở/Nền tảng đặt MANDATORY để thống nhất toàn tỉnh. Toàn bộ bảng màu UI dẫn xuất từ 2 màu bằng CSS `color-mix()` (sáng/tối), chữ trên nút tự chọn trắng/đen theo độ tương phản; màu chính phải đạt ≥ 3:1 với chữ trắng.
+- **An toàn:** logo chỉ nhận ảnh tải lên dạng data URL (PNG/JPG/WEBP/SVG, ≤ ~200 KB) hoặc tài nguyên có sẵn `./brand/*` — không nhận URL ngoài. Kiểm ở client (`validateBrand`) và DB (trigger `cfg.check_brand`). `cfg.my_brand()` cho mọi vai trò đọc giao diện của đơn vị mình mà không mở quyền xem cấu hình; `cfg.platform_brand()` cho trang đăng nhập.
+- **Mở rộng sau:** tên miền riêng theo trường (chọn giao diện trước khi đăng nhập), font chữ, ảnh nền trang đăng nhập.
+
+## ADR-016 · Làm rộng trước: màn hình xem trước cho mọi mục menu (16/10/2026)
+- **Yêu cầu:** mọi vai trò có UI cơ bản để hình dung toàn hệ thống trước khi build sâu từng mục.
+- **Quyết định:** mục chưa triển khai hiển thị `PreviewPage` dựng từ đặc tả dữ liệu (`src/features/preview/specs/*`, theo phân hệ, khóa `cổng:slug`): KPI, bảng, quy trình, lịch tuần, thẻ, biểu mẫu, hội thoại — dữ liệu hư cấu, mọi nút chỉ báo "hoàn thiện ở Mx". Có test bảo đảm 100% mục chưa triển khai có đặc tả và không có đặc tả thừa. Khi build thật một mục: đăng ký trang trong `PageView.PAGES`, đổi milestone sang READY.
+
 ## Giả định đang áp dụng (chờ xác nhận)
 
 | # | Nội dung | Mặc định đang dùng |

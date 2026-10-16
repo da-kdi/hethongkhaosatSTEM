@@ -19,6 +19,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-warning: var(--warning);
@@ -32,55 +33,62 @@
   --radius-sm: calc(var(--radius) - 4px);
 }
 
-/* Bảng màu: xanh lục lam "phòng thí nghiệm" + điểm nhấn hổ phách; nền giấy ấm */
+/* Bảng màu dẫn xuất từ màu nhận diện của đơn vị (cấu hình ui.brand — src/domain/branding.ts).
+   --brand / --brand-accent được ứng dụng đặt lúc chạy theo trường đang làm việc; mặc định là KDI (xanh đậm + cam). */
 :root {
-  --background: oklch(0.982 0.005 95);
-  --foreground: oklch(0.22 0.02 230);
+  --brand: #154b98;
+  --brand-fg: #ffffff;
+  --brand-accent: #f7a934;
+  --brand-accent-fg: #1f2937;
+
+  --background: oklch(0.985 0.004 250);
+  --foreground: oklch(0.22 0.025 255);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.02 230);
+  --card-foreground: oklch(0.22 0.025 255);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.02 230);
-  --primary: oklch(0.45 0.085 195);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.955 0.012 195);
-  --secondary-foreground: oklch(0.33 0.07 200);
-  --muted: oklch(0.955 0.006 95);
-  --muted-foreground: oklch(0.5 0.02 230);
-  --accent: oklch(0.95 0.02 195);
-  --accent-foreground: oklch(0.3 0.07 200);
-  --highlight: oklch(0.8 0.14 75);
+  --popover-foreground: oklch(0.22 0.025 255);
+  --primary: var(--brand);
+  --primary-foreground: var(--brand-fg);
+  --secondary: color-mix(in oklch, var(--brand) 8%, white);
+  --secondary-foreground: color-mix(in oklch, var(--brand) 85%, black);
+  --muted: oklch(0.962 0.005 250);
+  --muted-foreground: oklch(0.5 0.02 255);
+  --accent: color-mix(in oklch, var(--brand) 9%, white);
+  --accent-foreground: color-mix(in oklch, var(--brand) 85%, black);
+  --highlight: var(--brand-accent);
+  --highlight-foreground: var(--brand-accent-fg);
   --destructive: oklch(0.56 0.2 27);
   --destructive-foreground: oklch(0.99 0 0);
   --warning: oklch(0.72 0.15 70);
   --success: oklch(0.6 0.13 155);
-  --border: oklch(0.91 0.008 95);
-  --input: oklch(0.89 0.01 95);
-  --ring: oklch(0.55 0.1 195);
-  --sidebar: oklch(0.995 0.003 95);
+  --border: oklch(0.91 0.008 250);
+  --input: oklch(0.89 0.01 250);
+  --ring: var(--brand);
+  --sidebar: oklch(0.995 0.002 250);
   --radius: 0.75rem;
 }
 
 [data-theme="dark"] {
-  --background: oklch(0.18 0.015 230);
-  --foreground: oklch(0.94 0.01 95);
-  --card: oklch(0.22 0.017 230);
-  --card-foreground: oklch(0.94 0.01 95);
-  --popover: oklch(0.22 0.017 230);
-  --popover-foreground: oklch(0.94 0.01 95);
-  --primary: oklch(0.72 0.1 190);
-  --primary-foreground: oklch(0.18 0.02 230);
-  --secondary: oklch(0.27 0.03 200);
-  --secondary-foreground: oklch(0.88 0.04 190);
-  --muted: oklch(0.25 0.015 230);
-  --muted-foreground: oklch(0.7 0.015 230);
-  --accent: oklch(0.28 0.035 200);
-  --accent-foreground: oklch(0.92 0.03 190);
-  --highlight: oklch(0.8 0.14 75);
+  --background: oklch(0.18 0.018 255);
+  --foreground: oklch(0.94 0.008 250);
+  --card: oklch(0.22 0.02 255);
+  --card-foreground: oklch(0.94 0.008 250);
+  --popover: oklch(0.22 0.02 255);
+  --popover-foreground: oklch(0.94 0.008 250);
+  --primary: color-mix(in oklch, var(--brand) 55%, white);
+  --primary-foreground: oklch(0.18 0.02 255);
+  --secondary: color-mix(in oklch, var(--brand) 28%, oklch(0.22 0.02 255));
+  --secondary-foreground: color-mix(in oklch, var(--brand) 25%, white);
+  --muted: oklch(0.25 0.018 255);
+  --muted-foreground: oklch(0.7 0.015 250);
+  --accent: color-mix(in oklch, var(--brand) 30%, oklch(0.22 0.02 255));
+  --accent-foreground: color-mix(in oklch, var(--brand) 20%, white);
+  --highlight: var(--brand-accent);
   --destructive: oklch(0.65 0.19 27);
-  --border: oklch(0.3 0.015 230);
-  --input: oklch(0.33 0.015 230);
-  --ring: oklch(0.72 0.1 190);
-  --sidebar: oklch(0.2 0.016 230);
+  --border: oklch(0.3 0.018 255);
+  --input: oklch(0.33 0.018 255);
+  --ring: color-mix(in oklch, var(--brand) 55%, white);
+  --sidebar: oklch(0.2 0.019 255);
 }
 
 html,

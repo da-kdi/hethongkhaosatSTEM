@@ -53,6 +53,7 @@ const ADMIN = (): NavGroup => ({
     it("tai-khoan", "Tài khoản & vai trò", "users", "iam", READY, ["iam.account.view"]),
     it("vai-tro", "Ma trận quyền", "shield", "iam", READY, ["iam.role.view"]),
     it("cau-hinh", "Phân hệ & cấu hình", "sliders", "platform", READY, ["cfg.setting.view"]),
+    it("giao-dien", "Giao diện đơn vị", "palette", "platform", READY, ["cfg.setting.manage"], "Logo, màu nhận diện, tên hiển thị theo từng đơn vị (white-label)."),
     it("ban-do-phan-he", "Bản đồ phân hệ", "map", "platform", READY, ["cfg.setting.view"]),
     it("tu-dien", "Từ điển dữ liệu ngành", "book-a", "platform", READY, ["cfg.setting.view"]),
     it("danh-muc", "Danh mục dùng chung", "list", "platform", READY, ["cfg.setting.view"]),

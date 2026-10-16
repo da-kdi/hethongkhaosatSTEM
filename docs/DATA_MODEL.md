@@ -116,6 +116,15 @@ Nhật ký: trigger trên `org.unit`, `org.class`, `org.staff_membership`, `org.
 
 Mirror TS: `src/domain/guardian.ts`, `src/domain/provider.ts`, `src/domain/sha256.ts` (khớp `sha256()` của Postgres, có test).
 
+### Giao diện theo đơn vị (migration 0011, ADR-015)
+
+| Đối tượng | Ghi chú |
+|---|---|
+| `cfg.setting` khóa `ui.brand` | `{appName, tagline, logo, mark, primary, accent, radius}`; trigger `cfg.check_brand` kiểm giá trị |
+| `cfg.brand_for(unit)` | Gộp từ gốc → lá theo từng thuộc tính; dừng ở MANDATORY (nội bộ) |
+| `cfg.my_brand()` | Mọi người dùng có ngữ cảnh; đơn vị cấu hình = trường của ngữ cảnh hoặc đơn vị phạm vi |
+| `cfg.platform_brand()` | anon + authenticated — trang đăng nhập |
+
 ### catalog — Danh mục dùng chung (migration 0007, ADR-013)
 | Bảng | Nội dung |
 |---|---|

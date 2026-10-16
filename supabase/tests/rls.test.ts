@@ -351,6 +351,24 @@ describe.skipIf(!ADMIN_URL)("RLS · Postgres", () => {
       expect(await count(A.phThu, R.phThu)).toBe(0);
     });
 
+    it("giao diện theo đơn vị: kế thừa từng thuộc tính, mọi vai trò đọc được, giá trị được kiểm", async () => {
+      const brandAs = (acc: string, asg: string) => asUser(pool, { sub: acc, active_assignment_id: asg },
+        async (q) => (await q<{ b: Record<string, string> }>("select cfg.my_brand() as b"))[0].b);
+      const ts = await brandAs(A.tsPrincipal, R.tsPrincipal);
+      expect(ts).toMatchObject({ appName: "STEM Thanh Sơn", primary: "#0F766E", mark: "./brand/kdi-mark.png" });
+      expect((await brandAs(A.hsBm6, R.hsBm6)).appName).toBe("Quản trị STEM");
+      expect((await asUser(pool, null, async (q) => (await q<{ b: { primary: string } }>("select cfg.platform_brand() as b"))[0].b)).primary).toBe("#154B98");
+      await asUser(pool, { sub: A.bmAdmin, active_assignment_id: R.bmAdmin }, async (q) => {
+        await q("select cfg.set_setting($1, 'ui.brand', $2, 'AUTONOMOUS')", [U.bm, JSON.stringify({ primary: "#9F1239", appName: "STEM Bình Minh" })]);
+        expect((await q<{ b: Record<string, string> }>("select cfg.my_brand() as b"))[0].b).toMatchObject({ primary: "#9F1239", accent: "#F7A934" });
+        for (const bad of [{ primary: "red" }, { logo: "https://x.example/logo.png" }, { evil: 1 }]) {
+          await q("savepoint s");
+          await expect(q("select cfg.set_setting($1, 'ui.brand', $2, 'AUTONOMOUS')", [U.bm, JSON.stringify(bad)])).rejects.toThrow(/Màu|Logo|không hỗ trợ/);
+          await q("rollback to savepoint s");
+        }
+      });
+    });
+
     it("grant NCC hết hạn: trước hạn thấy lớp, sau hạn không thấy", async () => {
       const before = await asUser(pool, { sub: A.kdiAdmin, active_assignment_id: R.kdiAdmin },
         async (q) => (await q("select id from org.class")).length, "2026-06-01");

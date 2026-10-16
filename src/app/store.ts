@@ -15,6 +15,7 @@ import * as org from "@/domain/orgOps";
 import { exportTable, planImport, type ExchangeKind, type ImportPlan } from "@/domain/exchange";
 import * as guardian from "@/domain/guardian";
 import { upsertProviderProfile, type ProviderInput } from "@/domain/provider";
+import { BRAND_KEY, validateBrand, type Brand } from "@/domain/branding";
 import type { AuditEntry, ConfigMode, Dataset } from "@/domain/model";
 import { createDemoDataset, DEMO_TODAY } from "@/demo/seed";
 
@@ -222,6 +223,13 @@ export const actions = {
     });
     return b;
   },
+  /** Giao diện đơn vị (ui.brand) — kiểm giá trị như trigger cfg.check_brand rồi ghi như mọi cấu hình */
+  setBrand(unitId: string, value: Partial<Brand>, mode: ConfigMode = "AUTONOMOUS") {
+    const clean = Object.fromEntries(Object.entries(value).filter(([, v]) => v !== undefined && v !== ""));
+    const err = validateBrand(clean);
+    if (err) throw new Error(err);
+    actions.setSetting(unitId, BRAND_KEY, clean, mode);
+  },
   /** Ghi cấu hình — kiểm quyền giống cfg.set_setting() + trigger khóa MANDATORY */
   setSetting(unitId: string, key: string, value: unknown, mode: ConfigMode) {
     const access = getAccess();
@@ -238,7 +246,7 @@ export const actions = {
     const unitName = state.ds.units.find((u) => u.id === unitId)?.name ?? unitId;
     set({
       ...state,
-      ds: { ...state.ds, settings, audit: audit(state.ds, state.session, { action: existing ? "UPDATE" : "INSERT", entity: "cfg.setting", entityId: `${unitName} · ${key}`, unitId, summary: `${key} = ${JSON.stringify(value)} (${mode})` }) },
+      ds: { ...state.ds, settings, audit: audit(state.ds, state.session, { action: existing ? "UPDATE" : "INSERT", entity: "cfg.setting", entityId: `${unitName} · ${key}`, unitId, summary: `${key} = ${JSON.stringify(value).replace(/data:image\/[^"]+/g, "[ảnh]").slice(0, 200)} (${mode})` }) },
     });
   },
 };

@@ -255,6 +255,9 @@ const settings: ConfigSetting[] = [
   // Mặc định nền tảng: mọi phân hệ bật được bật/tắt đều bật, cấp dưới tự chủ
   ...(["training", "program", "resource", "schedule", "session", "assess", "survey", "integration"] as const).map((m) =>
     setting(U.platform, `module.${m}`, { enabled: true }, "AUTONOMOUS")),
+  // Giao diện (ui.brand): nền tảng dùng nhận diện KDI; THPT Thanh Sơn tự đổi màu & tên hiển thị (white-label theo trường)
+  setting(U.platform, "ui.brand", { appName: "Quản trị STEM", tagline: "KDI Education", logo: "./brand/kdi-logo.png", mark: "./brand/kdi-mark.png", primary: "#154B98", accent: "#F7A934" }, "AUTONOMOUS"),
+  setting(U.ts, "ui.brand", { appName: "STEM Thanh Sơn", tagline: "Trường THPT Thanh Sơn", primary: "#0F766E", accent: "#F59E0B", radius: "lg" }, "AUTONOMOUS"),
   // Sở bắt buộc: định hướng & kế hoạch, buổi dạy & điểm danh, khảo sát, báo cáo phải bật ở mọi trường
   setting(U.so, "module.plan", { enabled: true }, "MANDATORY"),
   setting(U.so, "module.session", { enabled: true }, "MANDATORY"),

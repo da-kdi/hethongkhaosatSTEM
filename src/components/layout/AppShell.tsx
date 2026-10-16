@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { FlaskConical, LogOut, Menu, Moon, Repeat, Sun, X } from "lucide-react";
+import { LogOut, Menu, Moon, Repeat, Sun, X } from "lucide-react";
 import { toast } from "sonner";
 import { actions, TODAY, useStore } from "@/app/store";
 import { PORTAL_STYLE } from "@/app/portal-style";
@@ -10,7 +10,8 @@ import { PORTAL_LABEL, ROLE_BY_CODE } from "@/domain/roles";
 import { NavIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { APP_NAME, DATA_MODE } from "@/lib/config";
+import { DATA_MODE } from "@/lib/config";
+import { BrandLockup, useBrand } from "@/app/brand";
 import { currentTheme, toggleTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
@@ -24,14 +25,12 @@ export function AppShell({ access, activeSlug, children }: { access: AccessConte
   const person = ds.persons.find((p) => p.id === access.personId);
   const contexts = assignmentsOf(ds, session.accountId!, TODAY);
   const style = PORTAL_STYLE[access.role.portal];
+  const brand = useBrand(access.configUnitId);
 
   const sidebar = (
     <nav aria-label="Menu chính" className="flex h-full flex-col">
-      <div className="flex h-14 items-center gap-2 border-b px-4">
-        <span className="grid size-8 place-items-center rounded-lg bg-primary text-primary-foreground">
-          <FlaskConical className="size-4" aria-hidden />
-        </span>
-        <span className="font-semibold">{APP_NAME}</span>
+      <div className="flex h-16 items-center gap-2 border-b px-4">
+        <BrandLockup brand={brand} />
       </div>
       <button
         type="button"
@@ -66,7 +65,7 @@ export function AppShell({ access, activeSlug, children }: { access: AccessConte
                       aria-current={active ? "page" : undefined}
                       className={cn(
                         "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm transition-colors",
-                        active ? "bg-primary text-primary-foreground" : "text-foreground/80 hover:bg-accent hover:text-accent-foreground",
+                        active ? "bg-primary text-primary-foreground shadow-[inset_3px_0_0_var(--brand-accent)]" : "text-foreground/80 hover:bg-accent hover:text-accent-foreground",
                       )}
                     >
                       <NavIcon name={it.icon} className="size-4 shrink-0" />
@@ -112,6 +111,7 @@ export function AppShell({ access, activeSlug, children }: { access: AccessConte
           <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Mở menu" onClick={() => setNavOpen(true)}>
             <Menu />
           </Button>
+          {brand.mark && <img src={brand.mark} alt="" className="size-7 rounded-md bg-white object-contain lg:hidden" />}
           <div className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
             <span className="hidden sm:inline">{access.scopeUnit.name}</span>
           </div>

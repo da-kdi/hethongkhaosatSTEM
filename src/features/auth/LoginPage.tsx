@@ -1,11 +1,12 @@
 import { useNavigate } from "@tanstack/react-router";
-import { FlaskConical, RotateCcw } from "lucide-react";
+import { RotateCcw } from "lucide-react";
+import { BrandLockup, useBrand } from "@/app/brand";
 import { actions, TODAY, useStore } from "@/app/store";
 import { PORTAL_STYLE } from "@/app/portal-style";
 import { assignmentsOf } from "@/domain/access";
 import { PORTAL_LABEL, ROLE_BY_CODE, type Portal } from "@/domain/roles";
 import { Button } from "@/components/ui/button";
-import { APP_NAME, DATA_MODE } from "@/lib/config";
+import { DATA_MODE } from "@/lib/config";
 import { cn } from "@/lib/utils";
 
 const ORDER: Portal[] = ["so", "truong", "to", "gv", "hs", "ph", "ncc", "platform"];
@@ -13,6 +14,7 @@ const ORDER: Portal[] = ["so", "truong", "to", "gv", "hs", "ph", "ncc", "platfor
 export function LoginPage() {
   const { ds } = useStore();
   const navigate = useNavigate();
+  const brand = useBrand();
 
   const accounts = ds.accounts.map((acc) => {
     const ctxs = assignmentsOf(ds, acc.id, TODAY);
@@ -28,16 +30,15 @@ export function LoginPage() {
 
   return (
     <div className="grid min-h-full lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-      <section className="relative flex flex-col justify-between overflow-hidden bg-[oklch(0.3_0.06_200)] px-6 py-8 text-white sm:px-10 lg:py-12">
+      <section className="relative flex flex-col justify-between overflow-hidden bg-[color-mix(in_oklch,var(--brand)_88%,black)] px-6 py-8 text-white sm:px-10 lg:py-12">
         <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.12]"
           style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "22px 22px" }} />
         <div className="relative flex items-center gap-2">
-          <span className="grid size-9 place-items-center rounded-lg bg-white/15"><FlaskConical className="size-5" aria-hidden /></span>
-          <span className="text-lg font-semibold">{APP_NAME}</span>
+          <BrandLockup brand={brand} invert />
         </div>
         <div className="relative my-10 max-w-md">
           <h1 className="text-3xl leading-tight font-semibold text-balance sm:text-4xl">
-            Một nền tảng, <span className="text-[oklch(0.85_0.13_80)]">đúng dữ liệu</span> cho từng vai trò.
+            Một nền tảng, <span className="text-highlight">đúng dữ liệu</span> cho từng vai trò.
           </h1>
           <p className="mt-4 text-sm leading-relaxed text-white/80">
             Sở giao chỉ tiêu, trường lập kế hoạch, tổ rà soát, giáo viên tổ chức hoạt động, học sinh và phụ huynh theo dõi,

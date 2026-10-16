@@ -1635,15 +1635,17 @@ insert into cfg.setting (id, unit_id, key, value, mode) values
   ('80000000-0000-4000-8000-000000000006', '10000000-0000-4000-8000-000000000001', 'module.assess', '{"enabled":true}'::jsonb, 'AUTONOMOUS'),
   ('80000000-0000-4000-8000-000000000007', '10000000-0000-4000-8000-000000000001', 'module.survey', '{"enabled":true}'::jsonb, 'AUTONOMOUS'),
   ('80000000-0000-4000-8000-000000000008', '10000000-0000-4000-8000-000000000001', 'module.integration', '{"enabled":true}'::jsonb, 'AUTONOMOUS'),
-  ('80000000-0000-4000-8000-000000000009', '10000000-0000-4000-8000-000000000002', 'module.plan', '{"enabled":true}'::jsonb, 'MANDATORY'),
-  ('80000000-0000-4000-8000-000000000010', '10000000-0000-4000-8000-000000000002', 'module.session', '{"enabled":true}'::jsonb, 'MANDATORY'),
-  ('80000000-0000-4000-8000-000000000011', '10000000-0000-4000-8000-000000000002', 'module.survey', '{"enabled":true}'::jsonb, 'MANDATORY'),
-  ('80000000-0000-4000-8000-000000000012', '10000000-0000-4000-8000-000000000002', 'module.report', '{"enabled":true}'::jsonb, 'MANDATORY'),
-  ('80000000-0000-4000-8000-000000000013', '10000000-0000-4000-8000-000000000002', 'catalog.activity_types', '["Bài học STEM","Hoạt động trải nghiệm STEM","Nghiên cứu khoa học kỹ thuật"]'::jsonb, 'EXTEND'),
-  ('80000000-0000-4000-8000-000000000015', '10000000-0000-4000-8000-000000000002', 'wf.session.dept_review', '{"enabled":true}'::jsonb, 'AUTONOMOUS'),
-  ('80000000-0000-4000-8000-000000000014', '10000000-0000-4000-8000-000000000010', 'catalog.activity_types', '["CLB Robotics"]'::jsonb, 'EXTEND'),
-  ('80000000-0000-4000-8000-000000000016', '10000000-0000-4000-8000-000000000020', 'wf.session.dept_review', '{"enabled":false}'::jsonb, 'AUTONOMOUS'),
-  ('80000000-0000-4000-8000-000000000017', '10000000-0000-4000-8000-000000000030', 'module.resource', '{"enabled":false}'::jsonb, 'AUTONOMOUS');
+  ('80000000-0000-4000-8000-000000000009', '10000000-0000-4000-8000-000000000001', 'ui.brand', '{"appName":"Quản trị STEM","tagline":"KDI Education","logo":"./brand/kdi-logo.png","mark":"./brand/kdi-mark.png","primary":"#154B98","accent":"#F7A934"}'::jsonb, 'AUTONOMOUS'),
+  ('80000000-0000-4000-8000-000000000011', '10000000-0000-4000-8000-000000000002', 'module.plan', '{"enabled":true}'::jsonb, 'MANDATORY'),
+  ('80000000-0000-4000-8000-000000000012', '10000000-0000-4000-8000-000000000002', 'module.session', '{"enabled":true}'::jsonb, 'MANDATORY'),
+  ('80000000-0000-4000-8000-000000000013', '10000000-0000-4000-8000-000000000002', 'module.survey', '{"enabled":true}'::jsonb, 'MANDATORY'),
+  ('80000000-0000-4000-8000-000000000014', '10000000-0000-4000-8000-000000000002', 'module.report', '{"enabled":true}'::jsonb, 'MANDATORY'),
+  ('80000000-0000-4000-8000-000000000015', '10000000-0000-4000-8000-000000000002', 'catalog.activity_types', '["Bài học STEM","Hoạt động trải nghiệm STEM","Nghiên cứu khoa học kỹ thuật"]'::jsonb, 'EXTEND'),
+  ('80000000-0000-4000-8000-000000000017', '10000000-0000-4000-8000-000000000002', 'wf.session.dept_review', '{"enabled":true}'::jsonb, 'AUTONOMOUS'),
+  ('80000000-0000-4000-8000-000000000010', '10000000-0000-4000-8000-000000000020', 'ui.brand', '{"appName":"STEM Thanh Sơn","tagline":"Trường THPT Thanh Sơn","primary":"#0F766E","accent":"#F59E0B","radius":"lg"}'::jsonb, 'AUTONOMOUS'),
+  ('80000000-0000-4000-8000-000000000016', '10000000-0000-4000-8000-000000000010', 'catalog.activity_types', '["CLB Robotics"]'::jsonb, 'EXTEND'),
+  ('80000000-0000-4000-8000-000000000018', '10000000-0000-4000-8000-000000000020', 'wf.session.dept_review', '{"enabled":false}'::jsonb, 'AUTONOMOUS'),
+  ('80000000-0000-4000-8000-000000000019', '10000000-0000-4000-8000-000000000030', 'module.resource', '{"enabled":false}'::jsonb, 'AUTONOMOUS');
 
 insert into cfg.term_label (unit_id, key, label) values
   ('10000000-0000-4000-8000-000000000020', 'unit.TO', 'Tổ bộ môn');
