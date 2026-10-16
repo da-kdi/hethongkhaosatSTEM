@@ -14,6 +14,7 @@ const ACTION_LABEL: Record<string, { label: string; variant: "default" | "succes
   DELETE: { label: "Xóa", variant: "danger" },
   IMPORT: { label: "Nhập dữ liệu", variant: "default" },
   EXPORT: { label: "Xuất dữ liệu", variant: "warning" },
+  LINK_CODE_FAIL: { label: "Nhập sai mã liên kết", variant: "danger" },
 };
 
 const ENTITY_LABEL: Record<string, string> = {

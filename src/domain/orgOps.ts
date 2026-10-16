@@ -6,6 +6,7 @@
 import { schoolOfUnit, subtreeIds, type AccessContext } from "./access.ts";
 import type { Permission } from "./permissions.ts";
 import type { Dataset, Enrollment, Person } from "./model.ts";
+import { revokeAllLinksOf } from "./guardian.ts";
 
 export class OrgError extends Error {}
 
@@ -156,5 +157,7 @@ export function upsertStudent(ds: Dataset, a: AccessContext, p: StudentInput): [
 export function setStudentStatus(ds: Dataset, a: AccessContext, personId: string, status: Enrollment["status"]): Dataset {
   const enr = [...ds.enrollments.filter((e) => e.studentPersonId === personId)].sort((x, y) => Number(y.status === "STUDYING") - Number(x.status === "STUDYING"))[0];
   assertScope(ds, a, ds.classes.find((c) => c.id === enr?.classId)?.schoolId, "org.person.manage");
-  return { ...ds, enrollments: ds.enrollments.map((e) => (e === enr ? { ...e, status } : e)) };
+  const next = { ...ds, enrollments: ds.enrollments.map((e) => (e === enr ? { ...e, status } : e)) };
+  // W8: chuyển trường/tốt nghiệp → thu hồi liên kết phụ huynh & mã mời chưa dùng (mirror trigger org.revoke_guardian_links)
+  return status === "STUDYING" ? next : revokeAllLinksOf(next, personId, new Date().toISOString());
 }

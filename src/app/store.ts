@@ -13,6 +13,8 @@ import { canWriteSetting } from "@/domain/config";
 import { applyImport, type ImportInput } from "@/domain/catalog";
 import * as org from "@/domain/orgOps";
 import { exportTable, planImport, type ExchangeKind, type ImportPlan } from "@/domain/exchange";
+import * as guardian from "@/domain/guardian";
+import { upsertProviderProfile, type ProviderInput } from "@/domain/provider";
 import type { AuditEntry, ConfigMode, Dataset } from "@/domain/model";
 import { createDemoDataset, DEMO_TODAY } from "@/demo/seed";
 
@@ -29,7 +31,8 @@ interface State {
 const STORAGE_KEY = "stem-demo-v2";
 
 /** Phần dữ liệu demo lưu lại giữa các lần tải trang (dữ liệu hư cấu). */
-const PERSISTED = ["settings", "audit", "catalog", "units", "classes", "persons", "staff", "teaching", "enrollments"] as const;
+const PERSISTED = ["settings", "audit", "catalog", "units", "classes", "persons", "staff", "teaching", "enrollments",
+  "guardianLinks", "guardianInvites", "providerProfiles"] as const;
 type PersistedKey = (typeof PERSISTED)[number];
 
 function load(): State {
@@ -140,6 +143,43 @@ export const actions = {
     mutateOrg("org.teaching_assignment", p.remove ? "DELETE" : "INSERT", (ds, a) => [org.setTeaching(ds, a, p), p.classId], `Phân công ${p.subject}`),
   setStudentStatus: (personId: string, status: "STUDYING" | "TRANSFERRED" | "GRADUATED") =>
     mutateOrg("org.enrollment", "UPDATE", (ds, a) => [org.setStudentStatus(ds, a, personId, status), personId], `Trạng thái: ${status}`),
+  // ---------- W8 · Liên kết phụ huynh (mirror RPC iam.issue_guardian_invite / redeem / approve / revoke) ----------
+  /** Phát mã mời — trả mã gốc để hiển thị MỘT lần; nhật ký không ghi mã hay SĐT. */
+  issueGuardianInvite(p: guardian.InviteInput): string {
+    let code = "";
+    mutateOrg("iam.guardian_invite", "INSERT", (ds, a) => {
+      const [next, c, inv] = guardian.issueInvite(ds, a, p, TODAY, new Date().toISOString());
+      code = c;
+      return [next, inv.id];
+    }, `Phát mã mời (${guardian.RELATION_LABEL[p.relation]}${p.phone ? ", có SĐT đối chiếu" : ""})`);
+    return code;
+  },
+  revokeGuardianInvite: (id: string) =>
+    mutateOrg("iam.guardian_invite", "UPDATE", (ds, a) => [guardian.revokeInvite(ds, a, id, new Date().toISOString()), id], "Thu hồi mã mời"),
+  approveGuardianLink: (id: string) =>
+    mutateOrg("iam.guardian_link", "UPDATE", (ds, a) => [guardian.approveLink(ds, a, id, new Date().toISOString()), id], "Duyệt liên kết phụ huynh"),
+  revokeGuardianLink: (id: string) =>
+    mutateOrg("iam.guardian_link", "UPDATE", (ds, a) => [guardian.revokeLink(ds, a, id, new Date().toISOString()), id], "Thu hồi liên kết phụ huynh"),
+  /** Phụ huynh nhập mã. Sai mã → ghi LINK_CODE_FAIL (đếm để khóa sau 5 lần/24 giờ). */
+  redeemGuardianCode(code: string): guardian.RedeemResult {
+    const access = getAccess();
+    if (!access) throw new Error("Chưa chọn ngữ cảnh");
+    const since = Date.now() - 86_400_000;
+    const failures = state.ds.audit.filter((e) => e.action === "LINK_CODE_FAIL" && e.actorAccountId === state.session.accountId && Date.parse(e.at) >= since).length;
+    try {
+      const [ds, r] = guardian.redeemInvite(state.ds, access, code, TODAY, new Date().toISOString(), failures);
+      set({ ...state, ds: { ...ds, audit: audit(ds, state.session, { action: "UPDATE", entity: "iam.guardian_link", entityId: r.linkId, summary: r.status === "VERIFIED" ? "Liên kết bằng mã mời (đã xác minh)" : "Gửi yêu cầu liên kết (chờ trường duyệt)" }) } });
+      return r;
+    } catch (e) {
+      if (e instanceof guardian.GuardianError && e.countsAsFailure) {
+        set({ ...state, ds: { ...state.ds, audit: audit(state.ds, state.session, { action: "LINK_CODE_FAIL", entity: "iam.guardian_invite", entityId: "—", summary: `Nhập sai mã liên kết (lần ${failures + 1}/${guardian.MAX_FAILURES_PER_DAY})` }) } });
+      }
+      throw e;
+    }
+  },
+  // ---------- Hồ sơ nhà cung cấp ----------
+  upsertProviderProfile: (p: ProviderInput) =>
+    mutateOrg("org.provider_profile", "UPDATE", (ds, a) => [upsertProviderProfile(ds, a, p, new Date().toISOString()), a.scopeUnit.id], "Cập nhật hồ sơ nhà cung cấp"),
   // ---------- Nhập/xuất hồ sơ theo tên kỹ thuật QĐ 2768 (mirror RPC org.import_* / org.log_export) ----------
   /** Chạy thử: không ghi gì, trả kế hoạch (số mới/cập nhật, lỗi theo dòng). */
   planImport(kind: ExchangeKind, table: string[][]): ImportPlan {

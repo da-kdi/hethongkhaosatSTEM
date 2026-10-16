@@ -100,6 +100,22 @@ Mirror TS: `src/domain/exchange.ts` (`planImport` chạy thử, `exportTable` ch
 
 Nhật ký: trigger trên `org.unit`, `org.class`, `org.staff_membership`, `org.teaching_assignment`; `org.enrollment` và `iam.person` ở chế độ PII (chỉ ghi tên cột thay đổi).
 
+### Liên kết phụ huynh & hồ sơ NCC (migration 0010, M2c-2, ADR-014)
+
+| Bảng / RPC | Quyền | Ghi chú |
+|---|---|---|
+| `iam.guardian_invite` | đọc: `iam.guardian.approve` + thấy HS | `code_hash` (SHA-256) không cấp SELECT; `phone` để đối chiếu; `used_at`, `revoked_at`; audit chế độ PII |
+| `iam.guardian_link.revoked_at` | — | Cột mới |
+| `iam.issue_guardian_invite(p)` → mã | `iam.guardian.approve` | HS đang học tại trường trong phạm vi; trả mã gốc một lần |
+| `iam.revoke_guardian_invite(id)`, `iam.approve_guardian_link(id)`, `iam.revoke_guardian_link(id)` | `iam.guardian.approve` | |
+| `iam.guardian_links_for_approver()` | `iam.guardian.approve` | Kèm tên PH (tối thiểu) |
+| `iam.redeem_guardian_code(code)` | `iam.guardian.request`, phạm vi LINKED | Khóa sau 5 lần sai/24h; trả `{linkId,status,studentName}` hoặc `{error}` |
+| trigger `org.revoke_guardian_links` | — | Hết đang học → thu hồi liên kết + mã chưa dùng |
+| `org.provider_profile` | đọc: chính NCC; phạm vi PLATFORM/UNIT_SUBTREE | `ma_dinh_danh_to_chuc` (BG_00420), `loai_to_chuc` (BG_00811), liên hệ, `fields[]`, mô tả |
+| `org.upsert_provider_profile(p)` | `org.provider.manage`, ngữ cảnh NCC | Sửa cả `org.unit.name` của NCC |
+
+Mirror TS: `src/domain/guardian.ts`, `src/domain/provider.ts`, `src/domain/sha256.ts` (khớp `sha256()` của Postgres, có test).
+
 ### catalog — Danh mục dùng chung (migration 0007, ADR-013)
 | Bảng | Nội dung |
 |---|---|

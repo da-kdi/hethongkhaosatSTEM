@@ -1616,6 +1616,10 @@ insert into iam.guardian_link (id, guardian_person_id, student_person_id, relati
   ('60000000-0000-4000-8000-000000000003', '30000000-0000-4000-8000-000000000011', '30000000-0000-4000-8000-000000000027', 'ME', 'VERIFIED', 'INVITE_OTP', '2026-09-15', '2027-08-31'),
   ('60000000-0000-4000-8000-000000000004', '30000000-0000-4000-8000-000000000016', '30000000-0000-4000-8000-000000000018', 'CHA', 'PENDING', null, null, null);
 
+insert into org.provider_profile (unit_id, ma_dinh_danh_to_chuc, loai_to_chuc, address, website, contact_name, contact_email, contact_phone, fields, description) values
+  ('10000000-0000-4000-8000-000000000050', '0100000001', 'Doanh nghiệp giáo dục', 'Số 1 đường Giả Định, Phường Đông Thành, tỉnh An Hòa', 'https://kdi.demo', 'Trịnh Minh Khoa', 'khoa.tm@kdi.demo', '0900000091', array['Robotics', 'Lập trình', 'IoT']::text[], 'Đơn vị demo cung cấp chương trình Robotics THCS và IoT THPT.'),
+  ('10000000-0000-4000-8000-000000000051', null, 'Doanh nghiệp thiết bị', null, null, null, null, null, array['Robotics', 'Thiết bị']::text[], 'Đơn vị demo, chưa hoàn thiện hồ sơ.');
+
 insert into iam.provider_grant (id, provider_unit_id, school_unit_id, program_code, level, valid_from, valid_to) values
   ('70000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000050', '10000000-0000-4000-8000-000000000010', 'ROBOTICS-THCS', 'AGGREGATE', '2026-09-01', '2027-06-30'),
   ('70000000-0000-4000-8000-000000000002', '10000000-0000-4000-8000-000000000050', '10000000-0000-4000-8000-000000000020', 'IOT-THPT', 'CLASS', '2025-09-01', '2026-06-30');

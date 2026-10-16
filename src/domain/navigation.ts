@@ -122,7 +122,7 @@ export const NAVIGATION: Record<Portal, NavGroup[]> = {
       it("hoc-sinh", "Lớp & học sinh", "users", "org", READY, ["org.class.view"]),
       it("nhan-su", "Giáo viên & tổ chuyên môn", "id", "org", READY, ["org.person.view"]),
       it("nhap-xuat-ho-so", "Nhập/xuất hồ sơ", "upload", "org", READY, ["org.person.manage", "report.export"], "Nhập/xuất Excel học sinh, giáo viên theo tên kỹ thuật QĐ 2768; kiểm tra toàn tệp trước khi ghi."),
-      it("lien-ket-phu-huynh", "Liên kết phụ huynh", "link", "org", "M2", ["iam.guardian.approve"], "Phát mã mời, xác minh, thu hồi liên kết (W8)."),
+      it("lien-ket-phu-huynh", "Liên kết phụ huynh", "link", "org", READY, ["iam.guardian.approve"], "Phát mã mời, xác minh, thu hồi liên kết (W8)."),
       it("doi-tac", "Nhà cung cấp & cấp quyền", "handshake", "org", "M2", ["iam.grant.manage"]),
     ]),
     ph("schedule", [
@@ -182,6 +182,7 @@ export const NAVIGATION: Record<Portal, NavGroup[]> = {
 
   ph: [
     OVERVIEW("Tổng quan học tập", false),
+    ph("org", [it("lien-ket-con", "Liên kết với con", "link", "org", READY, ["iam.guardian.request"], "Nhập mã mời do nhà trường phát (W8).")]),
     ph("schedule", [it("dang-ky", "Lịch & đăng ký hoạt động", "calendar", "schedule", "M6", ["schedule.event.register"])]),
     ph("session", [it("chuyen-can", "Chuyên cần của con", "user-check", "session", "M7", ["org.child.view"])]),
     ph("assess", [it("ket-qua", "Kết quả & nhận xét", "star", "assess", "M7", ["org.child.view"], "Chỉ hiển thị kết quả giáo viên đã công bố.")]),
@@ -193,7 +194,7 @@ export const NAVIGATION: Record<Portal, NavGroup[]> = {
     OVERVIEW("Tổng quan nhà cung cấp", false),
     ph("org", [
       it("truong-duoc-cap-quyen", "Trường được cấp quyền", "school", "org", READY),
-      it("ho-so-ncc", "Hồ sơ nhà cung cấp", "id", "org", "M2", ["org.provider.manage"]),
+      it("ho-so-ncc", "Hồ sơ nhà cung cấp", "id", "org", READY, ["org.provider.manage"]),
     ]),
     ph("training", [it("tap-huan", "Tổ chức tập huấn", "graduation", "training", "M5", ["training.course.manage"])]),
     ph("program", [it("san-pham", "Chương trình & học liệu", "book", "program", "M5", ["program.content.create"], "Danh mục chương trình, phiên bản, gửi thẩm định (W7).")]),

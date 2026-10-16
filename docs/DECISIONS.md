@@ -57,6 +57,12 @@
   - Danh mục chỉ đọc với trường/Sở; chỉ QTV nền tảng nạp phiên bản mới; mọi lần nạp đều ghi nhật ký.
 - **Cần chuẩn bị:** file danh mục xuất từ CSDL ngành, hoặc thông tin kết nối/tài khoản do Sở cung cấp.
 
+## ADR-014 · Liên kết phụ huynh bằng mã mời + đối chiếu SĐT (thực hiện D5, M2c-2)
+- **Quyết định:** trường phát mã 8 ký tự (bảng chữ không gây nhầm, CSPRNG), dùng một lần, hạn 14 ngày; DB chỉ lưu SHA-256, cột băm không cấp quyền đọc. PH nhập mã: SĐT của tài khoản PH (đã xác thực OTP khi đăng nhập bằng Supabase phone auth — M1b) khớp SĐT trường ghi trên mã → `VERIFIED/INVITE_OTP`; không khớp/không có → `PENDING`, QTV trường duyệt (`TEACHER_APPROVAL`). Liên kết hết hạn 31/8 cuối năm học; chuyển trường/tốt nghiệp → trigger thu hồi mọi liên kết và mã chưa dùng.
+- **Chống dò mã:** sai 5 lần/24 giờ → khóa; lần sai ghi `LINK_CODE_FAIL` vào audit (RPC trả `{error}` thay vì raise để giữ dòng nhật ký).
+- **Tối thiểu dữ liệu:** PH chỉ thấy tên con khi liên kết đã xác minh và còn hạn; trường thấy tên PH qua RPC `iam.guardian_links_for_approver()` (không mở RLS `iam.person`).
+- **Hoãn:** GVCN duyệt thay QTV (cần thêm quyền theo lớp chủ nhiệm); gửi OTP SMS riêng cho bước liên kết — chưa cần vì tài khoản PH đã xác thực SĐT.
+
 ---
 
 ## Giả định đang áp dụng (chờ xác nhận)

@@ -97,7 +97,7 @@ describe("Menu động", () => {
     expect(slugs(A.soLeader, R.soLeader)).toContain("truong-hoc");
     expect(slugs(A.bmHuong, R.bmHuong)).toContain("lop-cua-toi");
     expect(slugs(A.bmHuong, R.bmHuong)).not.toContain("tai-khoan");
-    expect(slugs(A.phThu, R.phThu)).toEqual(["tong-quan", "dang-ky", "chuyen-can", "ket-qua", "trao-doi", "khao-sat"]);
+    expect(slugs(A.phThu, R.phThu)).toEqual(["tong-quan", "lien-ket-con", "dang-ky", "chuyen-can", "ket-qua", "trao-doi", "khao-sat"]);
     expect(slugs(A.soSpecialist, R.soSpecialist)).toEqual(expect.arrayContaining(["tien-trinh", "giao-chi-tieu", "khao-sat", "tu-dien", "ban-do-phan-he"]));
     expect(slugs(A.kdiAdmin, R.kdiAdmin)).not.toContain("tu-dien");
   });

@@ -8,7 +8,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type pg from "pg";
 import { asUser, createTestDb, dropTestDb, ADMIN_URL } from "./db.ts";
 import { buildAccess } from "../../src/domain/access.ts";
-import { A, createDemoDataset, DEMO_TODAY, P, R, U } from "../../src/demo/seed.ts";
+import { A, createDemoDataset, DEMO_TODAY, P, R, S, U } from "../../src/demo/seed.ts";
 
 const DB = "stem_test_rls";
 const ds = createDemoDataset();
@@ -282,6 +282,73 @@ describe.skipIf(!ADMIN_URL)("RLS · Postgres", () => {
       });
       await expect(asUser(pool, { sub: A.bmPrincipal, active_assignment_id: R.bmPrincipal }, (q) =>
         q("select org.import_students($1)", [JSON.stringify({ rows: [] })]))).rejects.toThrow(/Không có quyền/);
+    });
+
+    it("W8 liên kết phụ huynh: mã mời một lần, đối chiếu SĐT, trường duyệt, khóa khi sai nhiều, thu hồi khi chuyển trường", async () => {
+      const tungPhone = ds.persons.find((p) => p.id === P.phTung)!.phone!;
+      await asUser(pool, { sub: A.bmAdmin, active_assignment_id: R.bmAdmin }, async (q) => {
+        const as = (sub: string, asg: string) => q("select set_config('request.jwt.claims', $1, true)", [JSON.stringify({ role: "authenticated", sub, active_assignment_id: asg })]);
+        const [{ code }] = await q<{ code: string }>("select iam.issue_guardian_invite($1) as code",
+          [JSON.stringify({ studentPersonId: S.bm6Second, relation: "CHA", phone: tungPhone })]);
+        expect(code).toMatch(/^[A-HJKMNP-Z2-9]{4}-[A-HJKMNP-Z2-9]{4}$/);
+        const [{ code: code2 }] = await q<{ code: string }>("select iam.issue_guardian_invite($1) as code",
+          [JSON.stringify({ studentPersonId: S.bm6First, relation: "NGUOI_GIAM_HO" })]);
+        expect(await q("select id, phone from iam.guardian_invite")).toHaveLength(2);
+        await q("savepoint s1");
+        await expect(q("select code_hash from iam.guardian_invite")).rejects.toThrow(/permission denied/);
+        await q("rollback to savepoint s1");
+        await q("savepoint s2");
+        await expect(q("select iam.issue_guardian_invite($1)", [JSON.stringify({ studentPersonId: S.ts10First, relation: "ME" })])).rejects.toThrow(/Không có quyền/);
+        await q("rollback to savepoint s2");
+
+        await as(A.phTung, R.phTung);
+        expect((await q<{ r: { error?: string } }>("select iam.redeem_guardian_code('ZZZZ-ZZZZ') as r"))[0].r.error).toMatch(/Mã không đúng/);
+        const [{ r }] = await q<{ r: { status: string; linkId: string } }>("select iam.redeem_guardian_code($1) as r", [code.toLowerCase()]);
+        expect(r.status).toBe("VERIFIED");
+        expect(await q("select 1 from iam.person where id = $1", [S.bm6Second])).toHaveLength(1);
+        expect((await q<{ r: { error?: string } }>("select iam.redeem_guardian_code($1) as r", [code]))[0].r.error).toBeTruthy();
+        const [{ r: r2 }] = await q<{ r: { status: string; linkId: string } }>("select iam.redeem_guardian_code($1) as r", [code2]);
+        expect(r2.status).toBe("PENDING");
+        expect(await q("select 1 from iam.person where id = $1", [S.bm6First])).toHaveLength(0);
+        for (let i = 0; i < 3; i++) await q("select iam.redeem_guardian_code('ZZZZ-ZZZZ')");
+        await q("savepoint s3");
+        await expect(q("select iam.redeem_guardian_code('ZZZZ-ZZZZ')")).rejects.toThrow(/quá 5 lần/);
+        await q("rollback to savepoint s3");
+
+        await as(A.bmAdmin, R.bmAdmin);
+        const rows = await q<{ id: string; guardian_name: string }>("select id, guardian_name from iam.guardian_links_for_approver()");
+        expect(rows.find((x) => x.id === r2.linkId)?.guardian_name).toBe("Mai Văn Tùng");
+        expect(await q("select 1 from iam.person where id = $1", [P.phTung])).toHaveLength(0); // trường không đọc trực tiếp hồ sơ PH
+        await q("select iam.approve_guardian_link($1)", [r2.linkId]);
+        expect((await q<{ status: string; method: string; expires_at: Date }>("select status, method, expires_at from iam.guardian_link where id = $1", [r2.linkId]))[0])
+          .toMatchObject({ status: "VERIFIED", method: "TEACHER_APPROVAL" });
+        await q("select org.set_student_status($1, 'TRANSFERRED')", [S.bm6First]);
+        await as(A.phTung, R.phTung);
+        expect((await q<{ status: string }>("select status from iam.guardian_link where id = $1", [r2.linkId]))[0].status).toBe("REVOKED");
+        expect(await q("select 1 from iam.person where id = $1", [S.bm6First])).toHaveLength(0);
+      });
+      await expect(asUser(pool, { sub: A.bmPrincipal, active_assignment_id: R.bmPrincipal }, (q) =>
+        q("select iam.issue_guardian_invite($1)", [JSON.stringify({ studentPersonId: S.bm6First, relation: "ME" })]))).rejects.toThrow(/Không có quyền/);
+    });
+
+    it("hồ sơ nhà cung cấp: chỉ QTV NCC sửa hồ sơ mình; trường/Sở xem mọi NCC, NCC chỉ thấy mình, PH không thấy", async () => {
+      const p = { name: "KDI Education (demo)", fields: ["Robotics", "XYZ"], website: "https://kdi.demo", contactEmail: "a@kdi.demo" };
+      await asUser(pool, { sub: A.kdiAdmin, active_assignment_id: R.kdiAdmin }, async (q) => {
+        await q("select org.upsert_provider_profile($1)", [JSON.stringify(p)]);
+        expect((await q<{ fields: string[] }>("select fields from org.provider_profile"))).toEqual([{ fields: ["Robotics"] }]);
+        await q("savepoint s");
+        await expect(q("select org.upsert_provider_profile($1)", [JSON.stringify({ ...p, website: "http://x" })])).rejects.toThrow(/không hợp lệ/);
+        await q("rollback to savepoint s");
+      });
+      for (const [acc, asg] of [[A.kdiExpert, R.kdiExpert], [A.bmAdmin, R.bmAdmin]]) {
+        await expect(asUser(pool, { sub: acc, active_assignment_id: asg }, (q) =>
+          q("select org.upsert_provider_profile($1)", [JSON.stringify(p)]))).rejects.toThrow(/Chỉ quản trị nhà cung cấp/);
+      }
+      const count = (acc: string, asg: string) => asUser(pool, { sub: acc, active_assignment_id: asg }, async (q) => (await q("select unit_id from org.provider_profile")).length);
+      expect(await count(A.bmPrincipal, R.bmPrincipal)).toBe(2);
+      expect(await count(A.soLeader, R.soLeader)).toBe(2);
+      expect(await count(A.kdiExpert, R.kdiExpert)).toBe(1);
+      expect(await count(A.phThu, R.phThu)).toBe(0);
     });
 
     it("grant NCC hết hạn: trước hạn thấy lớp, sau hạn không thấy", async () => {

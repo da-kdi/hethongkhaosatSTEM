@@ -99,7 +99,40 @@ export interface GuardianLink {
   status: "PENDING" | "VERIFIED" | "REVOKED";
   method?: "INVITE_OTP" | "TEACHER_APPROVAL";
   verifiedAt?: string;
+  verifiedBy?: string;
   expiresAt?: string;
+  revokedAt?: string;
+}
+
+/** Mã mời liên kết phụ huynh (W8): dùng một lần, có hạn, chỉ lưu băm SHA-256 của mã. */
+export interface GuardianInvite {
+  id: string;
+  studentPersonId: string;
+  codeHash: string;
+  relation: GuardianLink["relation"];
+  /** SĐT phụ huynh trường ghi nhận khi phát mã; khớp SĐT tài khoản PH → xác minh ngay, không khớp/không có → chờ trường duyệt */
+  phone?: string;
+  expiresAt: string;
+  createdAt: string;
+  createdBy?: string;
+  usedAt?: string;
+  usedByPersonId?: string;
+  revokedAt?: string;
+}
+
+/** Hồ sơ nhà cung cấp (đơn vị loại NCC). Tên đơn vị nằm ở OrgUnit.name. */
+export interface ProviderProfile {
+  unitId: string;
+  maDinhDanhToChuc?: string; // BG_00420
+  loaiToChuc?: string; // BG_00811 loaiToChucHopTacDn
+  address?: string;
+  website?: string;
+  contactName?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  fields: string[];
+  description?: string;
+  updatedAt?: string;
 }
 
 export type GrantLevel = "AGGREGATE" | "CLASS" | "NAMED";
@@ -179,7 +212,9 @@ export interface Dataset {
   teaching: TeachingAssignment[];
   enrollments: Enrollment[];
   guardianLinks: GuardianLink[];
+  guardianInvites: GuardianInvite[];
   grants: ProviderGrant[];
+  providerProfiles: ProviderProfile[];
   settings: ConfigSetting[];
   labels: TermLabel[];
   audit: AuditEntry[];

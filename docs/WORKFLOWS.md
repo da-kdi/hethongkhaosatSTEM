@@ -34,7 +34,7 @@ Người dùng (cfg.setting.manage, đơn vị trong phạm vi) ─► cfg.set_s
 | W5 | Báo cáo định kỳ | Sở mở kỳ → điền sẵn từ metric → trường bổ sung/giải trình → BGH ký nộp → Sở chấp nhận / yêu cầu giải trình → khóa snapshot | Mẫu báo cáo: Sở |
 | W6 | Nhiệm vụ & giải trình | Giao (đối tượng, hạn) → phản hồi + minh chứng → đóng / mở lại | SLA nhắc hạn |
 | W7 | NCC: thẩm định → triển khai | Tạo sản phẩm/học liệu → gửi thẩm định → duyệt/trả lại → công bố → trường đăng ký → hợp đồng + grant → triển khai → báo cáo → đánh giá | Hội đồng thẩm định (chờ xác nhận) |
-| W8 | Liên kết phụ huynh | Trường phát mã mời một lần → PH nhập mã → OTP tới SĐT trong hồ sơ **hoặc** GVCN/QTV duyệt → VERIFIED (có hạn) → thu hồi khi chuyển trường | Phương thức (chờ xác nhận D5) |
+| W8 | Liên kết phụ huynh | Trường phát mã mời một lần (14 ngày, kèm SĐT PH tùy chọn) → PH nhập mã → SĐT tài khoản khớp → VERIFIED; không khớp → PENDING, QTV trường duyệt → hết hạn 31/8 · thu hồi khi chuyển trường/tốt nghiệp · khóa sau 5 lần sai/24h | ✅ M2c-2 (ADR-014) |
 | W9 | Dự án HS | GV giao (rubric, hạn) → HS nộp (nhiều phiên bản) → GV chấm + nhận xét → công bố → HS/PH xem → hồ sơ năng lực | `visible_to_guardian` |
 
 Sơ đồ trạng thái mẫu (W2/W3):

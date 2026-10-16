@@ -64,7 +64,6 @@ export function ExchangePage({ access }: { access: AccessContext }) {
       <div className="grid gap-4 lg:grid-cols-[1fr_1.4fr]">
         <Section title="Cột dữ liệu" description="* bắt buộc. Cột không nhận diện được sẽ bị bỏ qua.">
           <TableWrap>
-            <table className="w-full text-sm">
               <thead><tr><th className={th}>Tên kỹ thuật</th><th className={th}>Ý nghĩa</th></tr></thead>
               <tbody>
                 {COLUMNS[kind].map((c) => (
@@ -77,7 +76,6 @@ export function ExchangePage({ access }: { access: AccessContext }) {
                   </tr>
                 ))}
               </tbody>
-            </table>
           </TableWrap>
           <div className="mt-3 flex flex-wrap gap-2">
             <Button variant="outline" disabled={busy} onClick={() => run(() => downloadXlsx(templateTable(kind), KIND_LABEL[kind], `mau-${kind === "students" ? "hoc-sinh" : "giao-vien"}.xlsx`))}>
@@ -109,14 +107,12 @@ export function ExchangePage({ access }: { access: AccessContext }) {
                     <>
                       <p className="text-sm text-destructive">Chưa ghi dữ liệu nào. Sửa các dòng dưới đây trong tệp rồi chọn lại tệp.</p>
                       <TableWrap>
-                        <table className="w-full text-sm">
                           <thead><tr><th className={th}>Dòng</th><th className={th}>Cột</th><th className={th}>Lỗi</th></tr></thead>
                           <tbody>
                             {plan.errors.slice(0, SHOW_ERRORS).map((e, i) => (
                               <tr key={i}><td className={td}>{e.row}</td><td className={cn(td, "font-mono text-xs")}>{e.column ?? "—"}</td><td className={cn(td, "min-w-48 whitespace-normal")}>{e.message}</td></tr>
                             ))}
                           </tbody>
-                        </table>
                       </TableWrap>
                       {plan.errors.length > SHOW_ERRORS && <p className="text-xs text-muted-foreground">Hiển thị {SHOW_ERRORS}/{plan.errors.length} lỗi đầu tiên.</p>}
                     </>

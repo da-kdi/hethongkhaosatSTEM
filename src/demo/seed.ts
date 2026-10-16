@@ -22,7 +22,7 @@
 import { did } from "../domain/ids.ts";
 import { initialCatalog } from "../domain/catalog.ts";
 import type {
-  Account, ClassRoom, ConfigSetting, Dataset, DeAnProgress, Enrollment, GuardianLink, OrgUnit, Person,
+  Account, ClassRoom, ConfigSetting, Dataset, DeAnProgress, Enrollment, GuardianLink, OrgUnit, Person, ProviderProfile,
   ProviderGrant, RoleAssignment, StaffMembership, TeachingAssignment, TodoItem,
 } from "../domain/model.ts";
 
@@ -237,6 +237,14 @@ const grants: ProviderGrant[] = [
   { id: did("grant", 2), providerUnitId: U.kdi, schoolUnitId: U.ts, programCode: "IOT-THPT", level: "CLASS", validFrom: "2025-09-01", validTo: "2026-06-30" },
 ];
 
+// ---------- Hồ sơ nhà cung cấp (hư cấu) ----------
+const providerProfiles: ProviderProfile[] = [
+  { unitId: U.kdi, maDinhDanhToChuc: "0100000001", loaiToChuc: "Doanh nghiệp giáo dục", address: "Số 1 đường Giả Định, Phường Đông Thành, tỉnh An Hòa",
+    website: "https://kdi.demo", contactName: "Trịnh Minh Khoa", contactEmail: "khoa.tm@kdi.demo", contactPhone: "0900000091",
+    fields: ["Robotics", "Lập trình", "IoT"], description: "Đơn vị demo cung cấp chương trình Robotics THCS và IoT THPT.", updatedAt: "2026-09-01" },
+  { unitId: U.rbv, loaiToChuc: "Doanh nghiệp thiết bị", fields: ["Robotics", "Thiết bị"], description: "Đơn vị demo, chưa hoàn thiện hồ sơ." },
+];
+
 // ---------- Cấu hình theo tầng ----------
 let cn = 0;
 function setting(unitId: string, key: string, value: unknown, mode: ConfigSetting["mode"]): ConfigSetting {
@@ -316,7 +324,7 @@ const deAn: DeAnProgress[] = [
 
 export function createDemoDataset(): Dataset {
   return structuredClone({
-    units, years, classes, persons, accounts, assignments, staff, teaching, enrollments, guardianLinks,
-    grants, settings, labels: [{ unitId: U.ts, key: "unit.TO", label: "Tổ bộ môn" }], audit: [], todos, deAn, catalog: initialCatalog(),
+    units, years, classes, persons, accounts, assignments, staff, teaching, enrollments, guardianLinks, guardianInvites: [],
+    grants, providerProfiles, settings, labels: [{ unitId: U.ts, key: "unit.TO", label: "Tổ bộ môn" }], audit: [], todos, deAn, catalog: initialCatalog(),
   });
 }
